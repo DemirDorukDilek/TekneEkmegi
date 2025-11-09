@@ -1,5 +1,7 @@
 DROP TABLE IF EXISTS sparisUrunler;
 DROP TABLE IF EXISTS sepetUrunler;
+DROP TABLE IF EXISTS nakitOdeme;
+DROP TABLE IF EXISTS krediKartiOdeme;
 DROP TABLE IF EXISTS sparis;
 DROP TABLE IF EXISTS Adres;
 DROP TABLE IF EXISTS yemek;
@@ -100,4 +102,39 @@ CREATE TABLE sparisUrunler(
     CONSTRAINT PK PRIMARY KEY(sparisNo,yemekID),
     CONSTRAINT sparisFKsparisNo FOREIGN KEY(sparisNo) REFERENCES sparis(sparisNo),
     CONSTRAINT sparisFKyemekID FOREIGN KEY(yemekID) REFERENCES yemek(ID)
+);
+
+CREATE TABLE nakitOdeme(
+    sparisNo                INT         NOT NULL,
+    odemeNo                 INT         NOT NULL AUTO_INCREMENT,
+    odemeDate               DATE        NOT NULL,
+    price                   FLOAT       NOT NULL CHECK (price >= 0),
+    EfendiOdedi             BOOLEAN     DEFAULT false, -- Musteriden para alindi
+    ParaTeslimAlindi        BOOLEAN     DEFAULT false, -- Para Sisteme Ulasti (Nakit odendi ise kuryeden aliniyor)
+    KuryeUcretiOdendi       BOOLEAN     DEFAULT false, -- kuryeye parasi ondendi
+    RestoranUcretiOdendi    BOOLEAN     DEFAULT false, -- restorana parasi odendi
+
+    CONSTRAINT PK PRIMARY KEY(odemeNo),
+    CONSTRAINT nakitOdemeFKsparisNo FOREIGN KEY(sparisNo) REFERENCES sparis(sparisNo),
+    CONSTRAINT UNQspraisNo UNIQUE (sparisNo)
+);
+
+CREATE TABLE krediKartiOdeme(
+    sparisNo                INT         NOT NULL,
+    odemeNo                 INT         NOT NULL AUTO_INCREMENT,
+    odemeDate               DATE        NOT NULL,
+    price                   FLOAT       NOT NULL CHECK (price >= 0),
+    EfendiOdedi             BOOLEAN     DEFAULT false,
+    ParaTeslimAlindi        BOOLEAN     DEFAULT false,
+    KuryeUcretiOdendi       BOOLEAN     DEFAULT false,
+    RestoranUcretiOdendi    BOOLEAN     DEFAULT false,
+
+    cvv                     INT(3)            NOT NULL,
+    kartSahibiAdi           VARCHAR(60)       NOT NULL,
+    Kartno                  INT(16)           NOT NULL,
+    dueDate                 DATE              NOT NULL,
+
+    CONSTRAINT PK PRIMARY KEY(odemeNo),
+    CONSTRAINT krediKartiOdemeFKsparisNo FOREIGN KEY(sparisNo) REFERENCES sparis(sparisNo),
+    CONSTRAINT UNQspraisNo UNIQUE (sparisNo)
 );
