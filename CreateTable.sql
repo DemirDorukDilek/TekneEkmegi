@@ -28,7 +28,7 @@ CREATE TABLE restoran(
     name                VARCHAR(100)    NOT NULL,
     telno               VARCHAR(14)     NOT NULL,
     adres               VARCHAR(200)    NOT NULL,
-    minsepettutari      INT             CHECK (minsepettutari>=0) DEFAULT 0 NOT NULL,
+    minsepettutari      INT             DEFAULT 0 NOT NULL CHECK (minsepettutari>=0),
 
     CONSTRAINT PK PRIMARY KEY(ID),
     CONSTRAINT UNQtelno UNIQUE(telno)
