@@ -16,7 +16,7 @@ CREATE TABLE efendi(
     surname     VARCHAR(30)     NOT NULL,
     telno       VARCHAR(14)     NOT NULL,
     email       VARCHAR(75),
-    password    VARCHAR(20)     NOT NULL,
+    password    VARCHAR(255)    NOT NULL,
 
     CONSTRAINT PK PRIMARY KEY(ID),
     CONSTRAINT UNQtelno UNIQUE(telno),
@@ -39,7 +39,7 @@ CREATE TABLE kurye(
     name        VARCHAR(30)     NOT NULL,
     telno       VARCHAR(14)     NOT NULL,
     email       VARCHAR(75),
-    password    VARCHAR(20)     NOT NULL,
+    password    VARCHAR(255)    NOT NULL,
 
     CONSTRAINT PK PRIMARY KEY(ID),
     CONSTRAINT UNQtelno UNIQUE(telno),

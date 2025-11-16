@@ -1,1 +1,0 @@
-INSERT INTO restoran(name,telno,adres) VALUES (%s, %s, %s)
