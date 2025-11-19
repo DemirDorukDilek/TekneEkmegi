@@ -6,6 +6,7 @@ def get_db_connection():
 
 def make_null(x):
     if x=="":return None
+    return x
     
 def read_file(fp):
     with open(fp, encoding="utf-8") as f:return f.read()
