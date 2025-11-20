@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS sparisUrunler;
+ DROP TABLE IF EXISTS sparisUrunler;
 DROP TABLE IF EXISTS sepetUrunler;
 DROP TABLE IF EXISTS nakitOdeme;
 DROP TABLE IF EXISTS krediKartiOdeme;
@@ -17,6 +17,8 @@ CREATE TABLE efendi(
     telno       VARCHAR(14)     NOT NULL,
     email       VARCHAR(75),
     password    VARCHAR(255)    NOT NULL,
+    X           INT             NOT NULL,
+    Y           INT             NOT NULL,
 
     CONSTRAINT PK PRIMARY KEY(ID),
     CONSTRAINT UNQtelno UNIQUE(telno),
@@ -29,6 +31,8 @@ CREATE TABLE restoran(
     telno               VARCHAR(14)     NOT NULL,
     adres               VARCHAR(200)    NOT NULL,
     minsepettutari      INT             DEFAULT 0 NOT NULL CHECK (minsepettutari>=0),
+    X           INT             NOT NULL,
+    Y           INT             NOT NULL,
 
     CONSTRAINT PK PRIMARY KEY(ID),
     CONSTRAINT UNQtelno UNIQUE(telno)
@@ -40,6 +44,8 @@ CREATE TABLE kurye(
     telno       VARCHAR(14)     NOT NULL,
     email       VARCHAR(75),
     password    VARCHAR(255)    NOT NULL,
+    X           INT             NOT NULL,
+    Y           INT             NOT NULL,
 
     CONSTRAINT PK PRIMARY KEY(ID),
     CONSTRAINT UNQtelno UNIQUE(telno),
@@ -51,6 +57,7 @@ CREATE TABLE yemek(
     name                VARCHAR(100)    NOT NULL,
     price               FLOAT           NOT NULL CHECK (price >= 0),
     restoranID          INT             NOT NULL,
+    
 
     CONSTRAINT PK PRIMARY KEY(ID),
     CONSTRAINT FKrestoranID FOREIGN KEY(restoranID) REFERENCES restoran(ID)
@@ -138,3 +145,4 @@ CREATE TABLE krediKartiOdeme(
     CONSTRAINT krediKartiOdemeFKsparisNo FOREIGN KEY(sparisNo) REFERENCES sparis(sparisNo),
     CONSTRAINT UNQspraisNo UNIQUE (sparisNo)
 );
+

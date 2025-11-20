@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HomePage</title>
+</head>
+<body>
+
+<h1>HomePage</h1>
+    <h2>Yakindaki Restoranlar</h2>
+
+        {% for row in restoranlar %}
+            <form action="/RestoranSecildi" method="post" style="margin-bottom: 8px;">
+                <input type="hidden" name="restoranID" value="{{ row.restoranID }}">
+                <button type="submit">
+                    Restoran ID: {{ row.restoranID }}
+                </button>
+            </form>
+        {% endfor %}
+
+<form action="/HomePage-Sepetbutton" method="post">
+    <button type="submit">Sepet Buttonu</button>
+</form>
+
+</body>
+</html>

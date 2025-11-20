@@ -8,7 +8,15 @@ app.secret_key = '!@#$%^&*IJHGFr34hbtjyornkhofij4q39rfa$ojgk$ogvkmW<OP4gvjmpomds
 
 @app.route("/")
 def index_get():
-    return redirect("/anan123")
+    return redirect("/login")
+
+@app.route("/HomePage")
+def HomePage_Get():
+    return render_template('HomePage.html')
+
+@app.route("/HomePage-Sepetbutton", methods=["POST"])
+def homepage_button():
+    return redirect("/login")
 
 @app.route('/login')
 def login_get():
@@ -71,7 +79,7 @@ def login_post():
             elif not check_password_hash(user_data[5],password):
                 flash('Şifre yanlış', 'danger')
             else:
-                return redirect("/")
+                return redirect("/HomePage")
                 
             
         except sql.Error as err:
