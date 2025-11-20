@@ -17,8 +17,6 @@ CREATE TABLE efendi(
     telno       VARCHAR(14)     NOT NULL,
     email       VARCHAR(75),
     password    VARCHAR(255)    NOT NULL,
-    X           INT             NOT NULL,
-    Y           INT             NOT NULL,
 
     CONSTRAINT PK PRIMARY KEY(ID),
     CONSTRAINT UNQtelno UNIQUE(telno),
@@ -31,8 +29,8 @@ CREATE TABLE restoran(
     telno               VARCHAR(14)     NOT NULL,
     adres               VARCHAR(200)    NOT NULL,
     minsepettutari      INT             DEFAULT 0 NOT NULL CHECK (minsepettutari>=0),
-    X           INT             NOT NULL,
-    Y           INT             NOT NULL,
+    X           FLOAT             NOT NULL,
+    Y           FLOAT             NOT NULL,
 
     CONSTRAINT PK PRIMARY KEY(ID),
     CONSTRAINT UNQtelno UNIQUE(telno)
@@ -44,8 +42,8 @@ CREATE TABLE kurye(
     telno       VARCHAR(14)     NOT NULL,
     email       VARCHAR(75),
     password    VARCHAR(255)    NOT NULL,
-    X           INT             NOT NULL,
-    Y           INT             NOT NULL,
+    X           FLOAT             NOT NULL,
+    Y           FLOAT             NOT NULL,
 
     CONSTRAINT PK PRIMARY KEY(ID),
     CONSTRAINT UNQtelno UNIQUE(telno),
@@ -72,6 +70,9 @@ CREATE TABLE Adres(
     cd              VARCHAR(50)     NOT NULL,
     binano          VARCHAR(50)     NOT NULL,
     daireno         VARCHAR(50)     NOT NULL,
+
+    X           FLOAT             NOT NULL,
+    Y           FLOAT             NOT NULL,
 
     CONSTRAINT PK PRIMARY KEY(efendiID,adresName),
     CONSTRAINT AdresFKefendiID FOREIGN KEY(efendiID) REFERENCES efendi(ID)

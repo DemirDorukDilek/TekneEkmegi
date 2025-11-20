@@ -72,8 +72,8 @@
 </head>
 <body>
     <div class="container">
-        <form action="/post/register" method="post">
-            <h2>Efendi Kayıt</h2>
+        <form id="addressForm" action="/post/efendiAddAdress" method="post">
+            <h2>Yeni Adres Ekle</h2>
             
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
@@ -84,32 +84,78 @@
             {% endwith %}
             
             <div class="input-group">
-                <label for="name">Ad</label>
+                <label for="name">Adres adı</label>
                 <input type="text" id="name" name="name" required>
             </div>
             
             <div class="input-group">
-                <label for="surname">Soyad</label>
-                <input type="text" id="surname" name="surname" required>
+                <label for="il">Şehir</label>
+                <input type="text" id="il" name="il" required>
             </div>
             
             <div class="input-group">
-                <label for="telno">Telefon Numarası</label>
-                <input type="tel" id="telno" name="telno" required>
+                <label for="ilce">İlçe</label>
+                <input type="text" id="ilce" name="ilce" required>
             </div>
             
             <div class="input-group">
-                <label for="email">E-posta</label>
-                <input type="email" id="email" name="email">
+                <label for="Mahalle">Mahalle</label>
+                <input type="text" id="Mahalle" name="Mahalle" required>
             </div>
-            
+
             <div class="input-group">
-                <label for="password">Parola</label>
-                <input type="password" id="password" name="password" required>
+                <label for="Cadde">Cadde</label>
+                <input type="text" id="Cadde" name="Cadde" required>
             </div>
-            
-            <button type="submit">Kayıt Ol</button>
+
+            <div class="input-group">
+                <label for="binano">Bina no</label>
+                <input type="text" id="binano" name="binano" required>
+            </div>
+
+            <div class="input-group">
+                <label for="daireno">Daire no</label>
+                <input type="text" id="daireno" name="daireno" required>
+            </div>
+
+            <input type="hidden" id="latitude" name="latitude" required>
+            <input type="hidden" id="longitude" name="longitude" required>
+
+            <button type="button" id="submitBtn">Ekle</button>
         </form>
     </div>
+
+    <script>
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                alert("Tarayıcınız konum servisini desteklemiyor.");
+            }
+        });
+
+        function showPosition(position) {
+            document.getElementById('latitude').value = position.coords.latitude;
+            document.getElementById('longitude').value = position.coords.longitude;
+            document.getElementById('addressForm').submit();
+        }
+
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("Konum bilgisi için izin vermeniz gerekiyor.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Konum bilgisi şu an mevcut değil.");
+                    break;
+                case error.TIMEOUT:
+                    alert("Konum bilgisi alma isteği zaman aşımına uğradı.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("Bilinmeyen bir hata oluştu.");
+                    break;
+            }
+        }
+    </script>
 </body>
 </html>
