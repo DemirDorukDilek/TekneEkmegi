@@ -29,6 +29,7 @@ CREATE TABLE restoran(
     telno               VARCHAR(14)     NOT NULL,
     adres               VARCHAR(200)    NOT NULL,
     minsepettutari      INT             DEFAULT 0 NOT NULL CHECK (minsepettutari>=0),
+    password    VARCHAR(255)      NOT NULL,
     X           FLOAT             NOT NULL,
     Y           FLOAT             NOT NULL,
 
