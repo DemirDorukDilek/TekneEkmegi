@@ -40,11 +40,13 @@ CREATE TABLE restoran(
 CREATE TABLE kurye(
     ID          INT             NOT NULL AUTO_INCREMENT,
     name        VARCHAR(30)     NOT NULL,
+    surname        VARCHAR(30)     NOT NULL,
     telno       VARCHAR(14)     NOT NULL,
     email       VARCHAR(75),
     password    VARCHAR(255)    NOT NULL,
-    X           FLOAT             NOT NULL,
-    Y           FLOAT             NOT NULL,
+    Y           FLOAT,
+    X           FLOAT,
+    isWorking   BOOLEAN         NOT NULL DEFAULT FALSE,
 
     CONSTRAINT PK PRIMARY KEY(ID),
     CONSTRAINT UNQtelno UNIQUE(telno),

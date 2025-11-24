@@ -1,5 +1,7 @@
-from dotenv import load_dotenv;load_dotenv()
 import os
+if os.name != "posix":
+    from dotenv import load_dotenv;load_dotenv()
+
 
 DB_CONFIG = {
     'host': "localhost",

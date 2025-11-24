@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efendi Kayıt Ol</title>
+    <title>Kurye Kayıt Ol</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -72,8 +72,8 @@
 </head>
 <body>
     <div class="container">
-        <form action="/post/login" method="post">
-            <h2>Efendi Giriş</h2>
+        <form action="/post/kuryeRegister" method="post">
+            <h2>Kurye Kayıt</h2>
             
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
@@ -84,8 +84,23 @@
             {% endwith %}
             
             <div class="input-group">
-                <label for="identifier">Telefon Numarası ya da Email</label>
-                <input type="text" id="identifier" name="identifier" required>
+                <label for="name">Ad</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="surname">Soyad</label>
+                <input type="text" id="surname" name="surname" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="telno">Telefon Numarası</label>
+                <input type="tel" id="telno" name="telno" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="email">E-posta</label>
+                <input type="email" id="email" name="email">
             </div>
             
             <div class="input-group">
@@ -93,19 +108,8 @@
                 <input type="password" id="password" name="password" required>
             </div>
             
-            <button type="submit">Giriş yap</button>
+            <button type="submit">Kayıt Ol</button>
         </form>
-        <div style="text-align: center; margin-top: 1rem;">
-            <p>
-                Hesabın yok mu? <a href="/register">Kayıt ol</a>
-            </p>
-            <p>
-                <a href="/restoranLogin">Restoran İşlemleri</a>
-            </p>
-            <p>
-                <a href="/kuryeLogin">Kurye İşlemleri</a>
-            </p>
-        </div>
     </div>
 </body>
 </html>

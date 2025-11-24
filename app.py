@@ -86,6 +86,14 @@ def restoranRegister_get():
 def register_get():
     return render_template("register.html")
 
+@app.route("/kuryeLogin")
+def kuryelogin_get():
+    return render_template("KuryeLogin.html")
+
+@app.route("/kuryeRegister")
+def kuryeregister_get():
+    return render_template("kuryeRegister.html")
+
 @app.route("/post/register", methods=["POST"])
 def register_post():
     
@@ -94,28 +102,17 @@ def register_post():
         surname = request.form["surname"]
         telno = request.form["telno"]
         email = request.form["email"]
-        print("email",email)
-        print("password",request.form["password"])
         hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256")
-        print("hashed_password",hashed_password)
 
         try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            sql_query = read_file("sql/EfendiSignIn.sql")
-            cursor.execute(sql_query, (name, surname, telno, make_null(email), hashed_password))
-            conn.commit()
+            sql_query("sql/EfendiSignIn.sql",(name, surname, telno, make_null(email), hashed_password))
             flash("Kayıt başarıyla tamamlandı!", "success")
             return redirect("/login")
-        
+
         except sql.IntegrityError:
             flash("Bu e-posta veya telefon numarası zaten kayıtlı.", "danger")
         except sql.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
-        finally:
-            if "conn" in locals() and conn.is_connected():
-                cursor.close()
-                conn.close()
             
         return redirect("/register")
 
@@ -127,12 +124,7 @@ def login_post():
         password = request.form["password"]
 
         try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            sql_query = read_file("sql/EfendiLogin.sql")
-            cursor.execute(sql_query, (identifier, identifier))
-            user_data = cursor.fetchone()
-            conn.commit()
+            user_data = sql_query("sql/EfendiLogin.sql",(identifier, identifier))
             if user_data is None:
                 flash("Telno/Email yanlış", "danger")
             elif not check_password_hash(user_data[5],password):
@@ -140,14 +132,9 @@ def login_post():
             else:
                 login(user_data[0])
                 return redirect("/HomePage")
-                
-            
+
         except sql.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
-        finally:
-            if "conn" in locals() and conn.is_connected():
-                cursor.close()
-                conn.close()
             
         return redirect("/login")
 
@@ -159,11 +146,7 @@ def RestoranLogin_post():
         password = request.form["password"]
 
         try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute(read_file("sql/RestoranLogin.sql"), (identifier,))
-            user_data = cursor.fetchone()
-            conn.commit()
+            user_data = sql_query("sql/RestoranLogin.sql",(identifier,))
             if user_data is None:
                 flash("Telno yanlış", "danger")
             elif not check_password_hash(user_data[5],password):
@@ -171,15 +154,9 @@ def RestoranLogin_post():
             else:
                 login(user_data[0])
                 return redirect("/RestoranHomePage") # TODO
-                
-            
         except sql.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
-        finally:
-            if "conn" in locals() and conn.is_connected():
-                cursor.close()
-                conn.close()
-            
+
         return redirect("/restoranLogin")
 
 @app.route("/post/RestoranRegister", methods=["POST"])
@@ -195,11 +172,7 @@ def RestoranRegister_post():
         hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256")
 
         try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            sql_query = read_file("sql/RestoranRegister.sql")
-            cursor.execute(sql_query, (name, telno, adres, minsepet,hashed_password, latitude,longitude))
-            conn.commit()
+            sql_query("sql/RestoranRegister.sql",(name, telno, adres, minsepet,hashed_password, latitude,longitude))
             flash("Kayıt başarıyla tamamlandı!", "success")
             return redirect("/restoranLogin")
         
@@ -207,12 +180,61 @@ def RestoranRegister_post():
             flash("Bu e-posta veya telefon numarası zaten kayıtlı.", "danger")
         except sql.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
-        finally:
-            if "conn" in locals() and conn.is_connected():
-                cursor.close()
-                conn.close()
-            
+
         return redirect("/restoranRegister")
+
+@app.route("/post/kuryeRegister", methods=["POST"])
+def kuryeregister_post():
+    
+    if request.method == "POST":
+        name = request.form["name"]
+        surname = request.form["surname"]
+        telno = request.form["telno"]
+        email = request.form["email"]
+        hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256")
+
+        try:
+            sql_query("sql/KuryeRegister.sql",(name, surname, telno, make_null(email), hashed_password))
+            flash("Kayıt başarıyla tamamlandı!", "success")
+            return redirect("/kuryeLogin")
+
+        except sql.IntegrityError:
+            flash("Bu e-posta veya telefon numarası zaten kayıtlı.", "danger")
+        except sql.Error as err:
+            flash(f"Bir hata oluştu: {err}", "danger")
+            
+        return redirect("/kuryeRegister")
+
+@app.route("/post/kuryeLogin", methods=["POST"])
+def kuryelogin_post():
+    
+    if request.method == "POST":
+        identifier = request.form["identifier"]
+        password = request.form["password"]
+
+        try:
+            user_data = sql_query("sql/KuryeLogin.sql",(identifier, identifier))
+            if user_data is None:
+                flash("Telno/Email yanlış", "danger")
+            elif not check_password_hash(user_data[5],password):
+                flash("Şifre yanlış", "danger")
+            else:
+                login(user_data[0])
+                return redirect("/KuryeHomePage")
+
+        except sql.Error as err:
+            flash(f"Bir hata oluştu: {err}", "danger")
+            
+        return redirect("/kuryeLogin")
+
+
+
+
+
+
+
+
+
 
 @app.route("/post/efendiAddAdress", methods=["POST"])
 @login_required
@@ -231,25 +253,16 @@ def efendiAddAdress_post():
             longitude = float(request.form.get("longitude"))
             user_id = session.get("user_id")
 
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute(read_file("sql/efendiAddAdress.sql"), (user_id, adres_adi, il,ilce, mahalle, cadde, bina_no, daire_no, latitude, longitude))
-            conn.commit()
-            print(f"User ID: {user_id} yeni adres ekliyor:")
-            print(f"Adres Adı: {adres_adi}, İl: {il}, İlçe: {ilce}")
-            print(f"Enlem: {latitude}, Boylam: {longitude}")
+            sql_query("sql/efendiAddAdress.sql",(user_id, adres_adi, il,ilce, mahalle, cadde, bina_no, daire_no, latitude, longitude))
             flash("Adres başarıyla eklendi!", "success")
             return redirect("/HomePage")
     
         except sql.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
-        finally:
-            if "conn" in locals() and conn.is_connected():
-                cursor.close()
-                conn.close()
     
     return redirect("/addAdress")
 
 
+    
 if __name__ == "__main__":
     app.run("0.0.0.0",3131)
