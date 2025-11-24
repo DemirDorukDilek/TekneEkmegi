@@ -21,7 +21,7 @@ def make_db():
             cursor.execute(l.strip()+";")
     conn.commit()
 
-def sql_query(querry,args):
+def sql_querry(querry,args):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -29,7 +29,7 @@ def sql_query(querry,args):
         cursor.execute(code, args)
         data = None
         if code.lower().startswith("select"):
-            data = cursor.fetchone()
+            data = cursor.fetchall()
         conn.commit()
         return data
     finally:
