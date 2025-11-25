@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tekne Ekmeği{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <a href="/login" class="navbar-logo" style="text-decoration:none; color:inherit;">
+            Tekne Ekmeği
+        </a>
+
+        <div class="hamburger" onclick="toggleMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+
+        <div id="menu" class="dropdown-menu">
+            <!-- BURASI ÖNEMLİ: FLASK ROTALARIYLA AYNI OLMALI -->
+            <a href="/login">Efendi Giriş</a>
+            <a href="/restoranLogin">Restoran Giriş</a>
+            <a href="/kuryeLogin">Kurye Giriş</a>
+        </div>
+    </header>
+
+    <main class="page-container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById("menu");
+            if (menu.style.display === "flex") {
+                menu.style.display = "none";
+            } else {
+                menu.style.display = "flex";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,29 +1,27 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>HomePage</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h1>HomePage</h1>
-    <h2>Yakindaki Restoranlar</h2>
+{% block title %}Ana Sayfa · Tekne Ekmeği{% endblock %}
 
-        {% for row in restoranlar %}
-            <form action="/RestoranSecildi" method="post" style="margin-bottom: 8px;">
-                <input type="hidden" name="restoranID" value="{{ row.restoranID }}">
-                <button type="submit">
-                    Restoran ID: {{ row.restoranID }}
-                </button>
-            </form>
-        {% endfor %}
+{% block content %}
+<div class="card">
+    <h1>Yakındaki Restoranlar</h1>
+    <p class="subtitle">Konumuna yakın restoranlardan sipariş ver.</p>
 
-<form action="/HomePage-Sepetbutton" method="post">
-    <button type="submit">Sepet Buttonu</button>
-</form>
+    {% for row in restoranlar %}
+    <form action="/RestoranSecildi" method="post" style="margin-bottom: 8px;">
+        <input type="hidden" name="restoranID" value="{{ row.restoranID }}">
+        <button type="submit" class="btn btn-secondary">
+            Restoran ID: {{ row.restoranID }}
+        </button>
+    </form>
+    {% endfor %}
 
-<form action="/addAdress" method="get">
-    <button type="submit">Adres Ekle</button>
-</form>
+    <form action="/HomePage-Sepetbutton" method="post">
+        <button type="submit" class="btn btn-primary">Sepete Git</button>
+    </form>
 
-</body>
-</html>
+    <form action="/addAdress" method="get">
+        <button type="submit" class="btn btn-secondary">Adres Ekle</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,151 +1,83 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efendi Kayıt Ol</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f8f9fa;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .container {
-            background: white;
-            padding: 2rem 3rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            color: #333;
-        }
-        .input-group {
-            margin-bottom: 1.25rem;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #555;
-            font-weight: 500;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 0.75rem;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .flash-message {
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 4px;
-            text-align: center;
-        }
-        .flash-success { background-color: #d4edda; color: #155724; }
-        .flash-danger { background-color: #f8d7da; color: #721c24; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <form id="Formmmmmmm" action="/post/RestoranRegister" method="post">
-            <h2>Restoran Giriş</h2>
-            
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                {% for category, message in messages %}
-                  <div class="flash-message flash-{{ category }}">{{ message }}</div>
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
-            
-            <div class="input-group">
-                <label for="name">Restoran Adı</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            
-            <div class="input-group">
-                <label for="telno">Telefon Numarası</label>
-                <input type="tel" id="telno" name="telno" required>
-            </div>
+{% extends "base.html" %}
 
-            <div class="input-group">
-                <label for="adress">Adress</label>
-                <input type="text" id="adress" name="adress" required>
-            </div>
+{% block title %}Restoran Kayıt · Tekne Ekmeği{% endblock %}
 
-            <div class="input-group">
-                <label for="Minsepet">Min sepet tutarı</label>
-                <input type="number" step="0.01" id="Minsepet" name="Minsepet" required>
-            </div>
+{% block content %}
+<div class="card">
+    <h1>Restoran Kayıt</h1>
+    <p class="subtitle">Tekne Ekmeği üzerinde restoran açmak için kayıt olun.</p>
 
-            <div class="input-group">
-                <label for="password">Parola</label>
-                <input type="password" id="password" name="password" required>
-            </div>
+    <form id="Formmmmmmm" action="/post/RestoranRegister" method="post">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
 
-            <input type="hidden" id="latitude" name="latitude" required>
-            <input type="hidden" id="longitude" name="longitude" required>
+        <div class="form-group">
+            <label for="name">Restoran Adı</label>
+            <input type="text" id="name" name="name" required>
+        </div>
 
-            <button type="button" id="submitBtn">Kayıt ol</button>
+        <div class="form-group">
+            <label for="telno">Telefon Numarası</label>
+            <input type="tel" id="telno" name="telno" placeholder="05xx xxx xx xx" required>
+        </div>
 
-        </form>
-        <script>
-        document.getElementById('submitBtn').addEventListener('click', function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
-            } else {
-                alert("Tarayıcınız konum servisini desteklemiyor.");
-            }
-        });
+        <div class="form-group">
+            <label for="adress">Adres</label>
+            <input type="text" id="adress" name="adress" required>
+        </div>
 
-        function showPosition(position) {
-            document.getElementById('latitude').value = position.coords.latitude;
-            document.getElementById('longitude').value = position.coords.longitude;
-            document.getElementById('Formmmmmmm').submit();
+        <div class="form-group">
+            <label for="Minsepet">Minimum sepet tutarı</label>
+            <input type="number" step="0.01" id="Minsepet" name="Minsepet" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Parola</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <input type="hidden" id="latitude" name="latitude" required>
+        <input type="hidden" id="longitude" name="longitude" required>
+
+        <button type="button" id="submitBtn" class="btn btn-primary">Konumumu Kullan ve Kayıt Ol</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('submitBtn').addEventListener('click', function () {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("Tarayıcınız konum servisini desteklemiyor.");
         }
+    });
 
-        function showError(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("Konum bilgisi için izin vermeniz gerekiyor.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("Konum bilgisi şu an mevcut değil.");
-                    break;
-                case error.TIMEOUT:
-                    alert("Konum bilgisi alma isteği zaman aşımına uğradı.");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    alert("Bilinmeyen bir hata oluştu.");
-                    break;
-            }
+    function showPosition(position) {
+        document.getElementById('latitude').value = position.coords.latitude;
+        document.getElementById('longitude').value = position.coords.longitude;
+        document.getElementById('Formmmmmmm').submit();
+    }
+
+    function showError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                alert("Konum izni reddedildi. Lütfen tarayıcı ayarlarından izin verin.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Konum bilgisi şu an mevcut değil.");
+                break;
+            case error.TIMEOUT:
+                alert("Konum bilgisi alma isteği zaman aşımına uğradı.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("Bilinmeyen bir hata oluştu.");
+                break;
         }
-    </script>
-    </div>
-</body>
-</html>
+    }
+</script>
+{% endblock %}

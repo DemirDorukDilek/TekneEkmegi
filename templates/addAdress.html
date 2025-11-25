@@ -1,161 +1,95 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efendi Kayıt Ol</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f8f9fa;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .container {
-            background: white;
-            padding: 2rem 3rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            color: #333;
-        }
-        .input-group {
-            margin-bottom: 1.25rem;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #555;
-            font-weight: 500;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 0.75rem;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .flash-message {
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 4px;
-            text-align: center;
-        }
-        .flash-success { background-color: #d4edda; color: #155724; }
-        .flash-danger { background-color: #f8d7da; color: #721c24; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <form id="addressForm" action="/post/efendiAddAdress" method="post">
-            <h2>Yeni Adres Ekle</h2>
-            
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                {% for category, message in messages %}
-                  <div class="flash-message flash-{{ category }}">{{ message }}</div>
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
-            
-            <div class="input-group">
-                <label for="name">Adres adı</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            
-            <div class="input-group">
-                <label for="il">Şehir</label>
-                <input type="text" id="il" name="il" required>
-            </div>
-            
-            <div class="input-group">
-                <label for="ilce">İlçe</label>
-                <input type="text" id="ilce" name="ilce" required>
-            </div>
-            
-            <div class="input-group">
-                <label for="Mahalle">Mahalle</label>
-                <input type="text" id="Mahalle" name="Mahalle" required>
-            </div>
+{% extends "base.html" %}
 
-            <div class="input-group">
-                <label for="Cadde">Cadde</label>
-                <input type="text" id="Cadde" name="Cadde" required>
-            </div>
+{% block title %}Adres Ekle · Tekne Ekmeği{% endblock %}
 
-            <div class="input-group">
-                <label for="binano">Bina no</label>
-                <input type="text" id="binano" name="binano" required>
-            </div>
+{% block content %}
+<div class="card">
+    <h1>Yeni Adres Ekle</h1>
+    <p class="subtitle">Sipariş verebilmek için teslimat adresini ekle.</p>
 
-            <div class="input-group">
-                <label for="daireno">Daire no</label>
-                <input type="text" id="daireno" name="daireno" required>
-            </div>
+    <form id="addressForm" action="/post/efendiAddAdress" method="post">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
 
-            <input type="hidden" id="latitude" name="latitude" required>
-            <input type="hidden" id="longitude" name="longitude" required>
+        <div class="form-group">
+            <label for="name">Adres adı</label>
+            <input type="text" id="name" name="name" required>
+        </div>
 
-            <button type="button" id="submitBtn">Ekle</button>
-        </form>
-    </div>
+        <div class="form-group">
+            <label for="il">Şehir</label>
+            <input type="text" id="il" name="il" required>
+        </div>
 
-    <script>
-        document.getElementById('submitBtn').addEventListener('click', function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
-            } else {
-                alert("Tarayıcınız konum servisini desteklemiyor.");
-            }
-        });
+        <div class="form-group">
+            <label for="ilce">İlçe</label>
+            <input type="text" id="ilce" name="ilce" required>
+        </div>
 
-        function showPosition(position) {
-            document.getElementById('latitude').value = position.coords.latitude;
-            document.getElementById('longitude').value = position.coords.longitude;
-            document.getElementById('addressForm').submit();
+        <div class="form-group">
+            <label for="Mahalle">Mahalle</label>
+            <input type="text" id="Mahalle" name="Mahalle" required>
+        </div>
+
+        <div class="form-group">
+            <label for="Cadde">Cadde</label>
+            <input type="text" id="Cadde" name="Cadde" required>
+        </div>
+
+        <div class="form-group">
+            <label for="binano">Bina no</label>
+            <input type="text" id="binano" name="binano" required>
+        </div>
+
+        <div class="form-group">
+            <label for="daireno">Daire no</label>
+            <input type="text" id="daireno" name="daireno" required>
+        </div>
+
+        <input type="hidden" id="latitude" name="latitude" required>
+        <input type="hidden" id="longitude" name="longitude" required>
+
+        <button type="button" id="submitBtn" class="btn btn-primary">
+            Konumumu Kullan ve Kaydet
+        </button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('submitBtn').addEventListener('click', function () {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("Tarayıcınız konum servisini desteklemiyor.");
         }
+    });
 
-        function showError(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("Konum bilgisi için izin vermeniz gerekiyor.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("Konum bilgisi şu an mevcut değil.");
-                    break;
-                case error.TIMEOUT:
-                    alert("Konum bilgisi alma isteği zaman aşımına uğradı.");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    alert("Bilinmeyen bir hata oluştu.");
-                    break;
-            }
+    function showPosition(position) {
+        document.getElementById('latitude').value = position.coords.latitude;
+        document.getElementById('longitude').value = position.coords.longitude;
+        document.getElementById('addressForm').submit();
+    }
+
+    function showError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                alert("Konum izni reddedildi. Lütfen tarayıcı ayarlarından izin verin.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Konum bilgisi şu an mevcut değil.");
+                break;
+            case error.TIMEOUT:
+                alert("Konum bilgisi alma isteği zaman aşımına uğradı.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("Bilinmeyen bir hata oluştu.");
+                break;
         }
-    </script>
-</body>
-</html>
+    }
+</script>
+{% endblock %}

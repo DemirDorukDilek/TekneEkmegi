@@ -1,18 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>HomePage</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h1>HomePage</h1>
-    <h2>Yakindaki Restoranlar</h2>
+{% block title %}Restoran Ana Sayfa · Tekne Ekmeği{% endblock %}
 
+{% block content %}
+<div class="card">
+    <h1>Restoran Paneli</h1>
+    <p class="subtitle">Menünü ve siparişlerini buradan yönet.</p>
 
-<form action="/addYemek" method="get">
-    <button type="submit">YEMAAAHHH</button>
-</form>
-
-
-</body>
-</html>
+    <form action="/addYemek" method="get">
+        <button type="submit" class="btn btn-primary">Yeni Yemek Ekle</button>
+    </form>
+</div>
+{% endblock %}
