@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efendi Kayıt Ol</title>
+    <title>yemek ekle</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -72,8 +72,8 @@
 </head>
 <body>
     <div class="container">
-        <form id="Formmmmmmm" action="/post/RestoranRegister" method="post">
-            <h2>Restoran Giriş</h2>
+        <form action="/post/restoranAddYemek" method="post">
+            <h2>yemek ekle</h2>
             
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
@@ -84,68 +84,17 @@
             {% endwith %}
             
             <div class="input-group">
-                <label for="name">Restoran Adı</label>
+                <label for="name">Yemek Adi</label>
                 <input type="text" id="name" name="name" required>
             </div>
+
+            <div class="input-group">
+                <label for="price">Fiyat</label>
+                <input type="number" step="0.01" id="price" name="price" required>
+            </div>
             
-            <div class="input-group">
-                <label for="telno">Telefon Numarası</label>
-                <input type="tel" id="telno" name="telno" required>
-            </div>
-
-            <div class="input-group">
-                <label for="adress">Adress</label>
-                <input type="text" id="adress" name="adress" required>
-            </div>
-
-            <div class="input-group">
-                <label for="Minsepet">Min sepet tutarı</label>
-                <input type="number" step="0.01" id="Minsepet" name="Minsepet" required>
-            </div>
-
-            <div class="input-group">
-                <label for="password">Parola</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-
-            <input type="hidden" id="latitude" name="latitude" required>
-            <input type="hidden" id="longitude" name="longitude" required>
-
-            <button type="button" id="submitBtn">Kayıt ol</button>
-
+            <button type="submit">Ekle</button>
         </form>
-        <script>
-        document.getElementById('submitBtn').addEventListener('click', function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
-            } else {
-                alert("Tarayıcınız konum servisini desteklemiyor.");
-            }
-        });
-
-        function showPosition(position) {
-            document.getElementById('latitude').value = position.coords.latitude;
-            document.getElementById('longitude').value = position.coords.longitude;
-            document.getElementById('Formmmmmmm').submit();
-        }
-
-        function showError(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("Konum bilgisi için izin vermeniz gerekiyor.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("Konum bilgisi şu an mevcut değil.");
-                    break;
-                case error.TIMEOUT:
-                    alert("Konum bilgisi alma isteği zaman aşımına uğradı.");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    alert("Bilinmeyen bir hata oluştu.");
-                    break;
-            }
-        }
-    </script>
     </div>
 </body>
 </html>

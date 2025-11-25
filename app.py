@@ -18,6 +18,12 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(days=30)  # 30 gün sonra sona erer
 )
 
+class TYPES:
+    R = "restoran"
+    E = "efendi"
+    K = "kurye"
+
+
 def check_session_validity():
     if not session.get("logged_in"):
         return {"valid": False,"reason": "not_logged_in","message": "Not Logged"}
@@ -30,14 +36,20 @@ def check_session_validity():
         return {"valid": False,"reason": "expired","message": "Expired Session"}
     return {"valid": True,"session_id": session.get("session_id"),"remaining_days": 30 - int((time.time() - login_time) / 86400)}
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        info = check_session_validity()
-        if not info["valid"]:
-            return info, 403
-        return f(*args, **kwargs)
-    return decorated_function
+def login_required(logintype=TYPES.E):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            info = check_session_validity()
+            if not info["valid"]:
+                return info, 403
+            if session.get("as","NULL") != logintype:
+                info = {"valid": False,"reason": "invalid_type","message": "wrong User Type"}
+                return info, 403
+            
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 def login(user_id,as_):
     session["logged_in"] = True
@@ -54,21 +66,31 @@ def index_get():
     return redirect("/login")
 
 @app.route("/HomePage")
-@login_required
+@login_required(TYPES.E)
 def HomePage_Get():
     print(sql_querry("sql/RestoranListele.sql",(session["user_id"],)))
     return render_template("HomePage.html")
 
+@app.route("/RestoranHomePage")
+@login_required(TYPES.R)
+def RestoranHomePage_get():
+    return render_template("RestoranHomePage.html")
+
 @app.route("/HomePage-Sepetbutton", methods=["POST"])
-@login_required
+@login_required(TYPES.E)
 def homepage_button():
     return redirect("/login")
 
 
 @app.route("/addAdress")
-@login_required
+@login_required(TYPES.E)
 def addAdress_get():
     return render_template("addAdress.html")
+
+@app.route("/addYemek")
+@login_required(TYPES.R)
+def addyemek_get():
+    return render_template("addYemek.html")
 
 @app.route("/login")
 def login_get():
@@ -233,7 +255,7 @@ def kuryelogin_post():
 
 
 @app.route("/post/efendiAddAdress", methods=["POST"])
-@login_required
+@login_required(TYPES.E)
 def efendiAddAdress_post():
     if request.method == "POST":
         
@@ -257,6 +279,23 @@ def efendiAddAdress_post():
             flash(f"Bir hata oluştu: {err}", "danger")
     
     return redirect("/addAdress")
+
+
+@app.route("/post/restoranAddYemek", methods=["POST"])
+@login_required(TYPES.R)
+def addYemek_post():
+    if request.method == "POST":
+        try:
+            name = request.form["name"]
+            price = float(request.form["price"])
+            sql_querry("sql/restoran/addYemek.sql",(name,price,session.get("user_id")))
+            return redirect("/RestoranHomePage")
+        except sql.Error as err:
+            flash(f"Bir hata oluştu: {err}", "danger")
+
+    return redirect("/addYemek")
+    
+
 
 
     

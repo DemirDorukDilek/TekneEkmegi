@@ -1,0 +1,1 @@
+INSERT INTO yemek(name,price,restoranID) VALUES(%s,%s,%s)
