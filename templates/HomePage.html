@@ -18,13 +18,13 @@
 <div class="restaurant-list">
     {% for row in restoranlar %}
     {# row: (restoranID, EfendiID, distSqr) #}
-    <form action="/RestoranSecildi" method="post" class="restaurant-card">
+    <form action="/restoran/{{row[0]}}" method="get" class="restaurant-card">
         <input type="hidden" name="restoranID" value="{{ row[0] }}">
 
         <div class="restaurant-card-info">
-            <div class="restaurant-name">Restoran #{{ row[0] }}</div>
+            <div class="restaurant-name">Restoran {{ row[3] }}</div>
             <div class="restaurant-meta">
-                Mesafe (kare): {{ row[2] }}
+                Mesafe: {{ row[2] }}
             </div>
         </div>
 

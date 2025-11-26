@@ -84,6 +84,7 @@ CREATE TABLE Adres(
 CREATE TABLE sepetUrunler(
     efendiID    INT        NOT NULL,
     yemekID     INT        NOT NULL,
+    adet        INT        NOT NULL,
 
     CONSTRAINT PK PRIMARY KEY(efendiID,yemekID),
     CONSTRAINT sepetUrunlerFKefendiID FOREIGN KEY(efendiID) REFERENCES efendi(ID),

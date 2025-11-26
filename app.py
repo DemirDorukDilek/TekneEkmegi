@@ -103,6 +103,7 @@ def HomePage_Get():
 
     # Restoranlar (eski davranış aynen kalsın)
     restoranlar = sql_querry("sql/RestoranListele.sql", (user_id,)) or []
+    restoranlar = list(map(lambda x: [x[0],x[1],x[2]**0.5,x[3]] ,restoranlar))
 
     # Seçili adres
     selected_name = session.get("selected_adresName")
@@ -129,7 +130,7 @@ def RestoranHomePage_get():
     yemekler = sql_querry("sql/restoran/YemekleriListele.sql", (restoranID,))
     return render_template("RestoranHomePage.html", yemekler=yemekler)
 
-@app.route("/HomePage-Sepetbutton", methods=["POST"])
+@app.route("/sepet")
 @login_required(TYPES.E)
 def homepage_button():
     return redirect("/login")
@@ -191,6 +192,14 @@ def adreslerim_get():
     selected_name = session.get("selected_adresName")
 
     return render_template("Adreslerim.html", adresler=adresler, selected_name=selected_name)
+
+@app.route("/restoran/<rid>")
+@login_required(TYPES.E)
+def restoran_get(rid):
+    print(rid)
+    yemekler = sql_querry("sql/restoran/YemekleriListele.sql",(rid,))
+    print(yemekler)
+    return render_template("EfendiRestoranEkrani.html",yemekler=yemekler)
 
 @app.route("/adres/sec", methods=["POST"])
 @login_required(TYPES.E)
@@ -474,15 +483,25 @@ def efendiAddAdress_post():
 
         except sql.IntergrityError:
             flash("Bu isimde bir adres zaten kayıtlı. Lütfen farklı bir adres adı girin.", "danger")
-            return redirect("/addAdress");
+            return redirect("/addAdress")
 
         except sql.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
-            return redirect("/addAdress");
+            return redirect("/addAdress")
     
     return redirect("/addAdress")
 
-
+@app.route("/post/addyemek/<yid>", methods=["POST"])
+@login_required(TYPES.E)
+def addyemek_post(yid):
+    adet = sql_querry("SELECT adet FROM sepetUrunler WHERE efendiID=%s AND yemekID=%s",(session.get("user_id"),yid))
+    if adet == []:
+        sql_querry("INSERT INTO sepeturunler VALUES (%s,%s,%s)",(session.get("user_id"),yid,0))
+        adet = 0
+    else:
+        adet = adet[0][0]
+    sql_querry("sql/efendi/updateYemek.sql",(adet+1,session.get("user_id"),yid))
+    return redirect("/HomePage") # TODO
 
 @app.route("/post/restoranAddYemek", methods=["POST"])
 @login_required(TYPES.R)
@@ -497,6 +516,6 @@ def addYemek_post():
             flash(f"Bir hata oluştu: {err}", "danger")
 
     return redirect("/addYemek")
-    
+
 if __name__ == "__main__":
     app.run("0.0.0.0",3131)

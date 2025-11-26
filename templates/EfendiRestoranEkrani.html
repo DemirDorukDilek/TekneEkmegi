@@ -1,0 +1,13 @@
+<html>
+    <body>
+        {% for row in yemekler %}
+            <div>
+                <p>{{row[1]}}</p>
+                <p>{{row[2]}}</p>
+                <form action="/post/addyemek/{{row[0]}}" method="post">
+                    <button type="submit">Gönder</button>
+                </form>
+            </div>
+        {% endfor %}
+    </body>
+</html>
