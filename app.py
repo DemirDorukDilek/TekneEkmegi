@@ -124,7 +124,9 @@ def HomePage_Get():
 @app.route("/RestoranHomePage")
 @login_required(TYPES.R)
 def RestoranHomePage_get():
-    return render_template("RestoranHomePage.html")
+    restoranID = session.get("user_id")
+    yemekler = sql_querry("sql/restoran/YemekleriListele.sql", (restoranID,))
+    return render_template("RestoranHomePage.html", yemekler=yemekler)
 
 @app.route("/HomePage-Sepetbutton", methods=["POST"])
 @login_required(TYPES.E)
@@ -478,6 +480,7 @@ def efendiAddAdress_post():
             return redirect("/addAdress");
     
     return redirect("/addAdress")
+
 
 
 @app.route("/post/restoranAddYemek", methods=["POST"])

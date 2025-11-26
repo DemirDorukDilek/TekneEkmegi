@@ -1,22 +1,31 @@
 {% extends "base.html" %}
 
-{% block title %}Restoran Paneli · Tekne Ekmeği{% endblock %}
+{% block title %}Restoran Ana Sayfa · Tekne Ekmeği{% endblock %}
 
 {% block content %}
 <div class="card">
     <h1>Restoran Paneli</h1>
     <p class="subtitle">Menünü ve siparişlerini buradan yönet.</p>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="flash-message flash-{{ category }}">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-
     <form action="/addYemek" method="get">
         <button type="submit" class="btn btn-primary">Yeni Yemek Ekle</button>
     </form>
+
+    <h2 style="margin-top: 24px; color: #d8a451; font-size: 18px;">Mevcut Yemekler</h2>
+    
+    {% if yemekler and yemekler|length > 0 %}
+        <div style="margin-top: 12px;">
+            {% for yemek in yemekler %}
+            <div style="background: #1e140c; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #d8a451;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 500;">{{ yemek[1] }}</span>
+                    <span style="color: #d8a451; font-weight: 600;">{{ "%.2f"|format(yemek[2]) }} ₺</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="color: #bfa78a; margin-top: 12px; font-size: 14px;">Henüz yemek eklenmemiş.</p>
+    {% endif %}
 </div>
 {% endblock %}

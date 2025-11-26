@@ -109,7 +109,7 @@ CREATE TABLE sparis(
 CREATE TABLE sparisUrunler(
     sparisNo    INT     NOT NULL,
     yemekID     INT     NOT NULL,
-
+    adet        INT     NOT NULL,
     CONSTRAINT PK PRIMARY KEY(sparisNo,yemekID),
     CONSTRAINT sparisFKsparisNo FOREIGN KEY(sparisNo) REFERENCES sparis(sparisNo),
     CONSTRAINT sparisFKyemekID FOREIGN KEY(yemekID) REFERENCES yemek(ID)
