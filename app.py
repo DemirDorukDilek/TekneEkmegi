@@ -58,7 +58,37 @@ def login(user_id,as_):
     session["login_time"] = time.time()
     session["user_id"] = user_id
     session["as"] = as_
-    
+
+
+@app.context_processor
+def inject_navbar_adresler():
+    navbar_adresler = []
+    selected_adresName = session.get("selected_adresName")
+
+    try:
+        # sadece efendi kullanıcı için adres listesini navbar'a verelim
+        if session.get("as") == TYPES.E and "user_id" in session:
+            rows = sql_querry(
+                "SELECT adresName FROM Adres WHERE efendiID = %s ORDER BY adresName",
+                (session["user_id"],)
+            ) or []
+
+            # İlk adres varsa ve daha önce seçili adres yoksa, otomatik ilk adresi seç
+            if rows and not selected_adresName:
+                selected_adresName = rows[0][0]
+                session["selected_adresName"] = selected_adresName
+
+            # rows = [(adresName,), (adresName2,), ...] şeklinde kalsın
+            navbar_adresler = rows
+
+    except Exception:
+        # Navbar yüzünden hiçbir sayfa patlamasın diye sessiz geçiyoruz
+        pass
+
+    return dict(
+        navbar_adresler=navbar_adresler,
+        navbar_selected_adresName=selected_adresName
+    )
 
 @app.route("/")
 def index_get():
@@ -432,9 +462,13 @@ def efendiAddAdress_post():
             longitude = float(request.form.get("longitude"))
             user_id = session.get("user_id")
 
-            sql_querry("sql/efendiAddAdress.sql",(user_id, adres_adi, il,ilce, mahalle, cadde, bina_no, daire_no, latitude, longitude))
-            flash("Adres başarıyla eklendi!", "success")
-            return redirect("/HomePage")
+            sql_querry("sql/efendiAddAdress.sql", (user_id, adres_adi, il, ilce, mahalle, cadde, bina_no, daire_no, latitude, longitude))
+
+        # Eğer daha önce seçili adres yoksa, bu yeni eklenen adresi varsayılan seçili yap
+            if not session.get("selected_adresName"):
+                session["selected_adresName"] = adres_adi
+                flash("Adres başarıyla eklendi!", "success")
+                return redirect("/HomePage")
 
         except sql.IntergrityError:
             flash("Bu isimde bir adres zaten kayıtlı. Lütfen farklı bir adres adı girin.", "danger")
@@ -460,9 +494,6 @@ def addYemek_post():
             flash(f"Bir hata oluştu: {err}", "danger")
 
     return redirect("/addYemek")
-    
-
-
     
 if __name__ == "__main__":
     app.run("0.0.0.0",3131)

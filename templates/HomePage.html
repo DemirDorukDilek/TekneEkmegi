@@ -3,68 +3,39 @@
 {% block title %}Ana Sayfa · Tekne Ekmeği{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h1>Ana Sayfa</h1>
-    <p class="subtitle">Tekne Ekmeği ile sipariş verebilmek için aşağıdaki restoranları kullanabilirsin.</p>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="flash-message flash-{{ category }}">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="flash-message flash-{{ category }}">{{ message }}</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
 
-    <h2 style="margin: 10px 0 6px;">Seçili adresim</h2>
+<h2 style="margin: 0 0 8px;">Yakındaki Restoranlar</h2>
 
-    {% if selected_adres %}
-    <p style="font-size: 13px; margin-bottom: 14px;">
-        <strong>{{ selected_adres[0] }}</strong> –
-        {{ selected_adres[3] }} Mah., {{ selected_adres[4] }} Cd.,
-        {{ selected_adres[5] }}/{{ selected_adres[6] }} –
-        {{ selected_adres[2] }}/{{ selected_adres[1] }}
-    </p>
-    {% else %}
+{% if restoranlar %}
+<div class="restaurant-list">
+    {% for row in restoranlar %}
+    {# row: (restoranID, EfendiID, distSqr) #}
+    <form action="/RestoranSecildi" method="post" class="restaurant-card">
+        <input type="hidden" name="restoranID" value="{{ row[0] }}">
 
-    <p class="subtitle">
-        Seçili bir adresin yok. Lütfen sağ üstteki 👤 ikonuna tıklayıp adreslerinden birini seç.
-    </p>
-    {% endif %}
-
-    <hr style="margin: 16px 0; border: 0; border-top: 1px solid #4a3b2b;">
-
-    <h2 style="margin-bottom: 8px;">Yakındaki Restoranlar</h2>
-
-    {% if restoranlar %}
-    <div class="restaurant-list">
-        {% for row in restoranlar %}
-        {# row: (restoranID, EfendiID, distSqr) #}
-        <form action="/RestoranSecildi" method="post" class="restaurant-card">
-            <input type="hidden" name="restoranID" value="{{ row[0] }}">
-
-            <div class="restaurant-card-info">
-                <div class="restaurant-name">Restoran #{{ row[0] }}</div>
-                <div class="restaurant-meta">
-                    Mesafe (kare): {{ row[2] }}
-                </div>
+        <div class="restaurant-card-info">
+            <div class="restaurant-name">Restoran #{{ row[0] }}</div>
+            <div class="restaurant-meta">
+                Mesafe (kare): {{ row[2] }}
             </div>
+        </div>
 
-            <button type="submit" class="btn btn-secondary btn-sm">
-                Seç
-            </button>
-        </form>
-        {% endfor %}
-    </div>
-    {% else %}
-    <p class="subtitle">Yakınında restoran bulunamadı.</p>
-    {% endif %}
-
-    <form action="/HomePage-Sepetbutton" method="post">
-        <button type="submit" class="btn btn-primary">Sepete Git</button>
+        <button type="submit" class="btn btn-secondary btn-sm">
+            Seç
+        </button>
     </form>
-
-    <form action="/addAdress" method="get">
-        <button type="submit" class="btn btn-secondary">Yeni Adres Ekle</button>
-    </form>
+    {% endfor %}
 </div>
+{% else %}
+<p class="subtitle">Yakınında restoran bulunamadı.</p>
+{% endif %}
+
 {% endblock %}

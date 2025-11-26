@@ -11,35 +11,65 @@
 <body>
 
     <header class="navbar">
-        <a href="/HomePage" class="navbar-logo"
-            style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:8px;">
-            <img src="{{ url_for('static', filename='tekne_logo.png') }}" alt="Logo"
-                style="height:80px; width:auto; border-radius:4px;">
-            <span style="font-weight:600;">Tekne Ekmeği</span>
-        </a>
-
+        <div class="navbar-left">
+            <a href="/HomePage" class="navbar-logo" style="text-decoration:none; color:inherit;">
+                Tekne Ekmeği
+            </a>
+    
+            <div class="navbar-address-container">
+                <button type="button" class="navbar-address" onclick="toggleAddressMenu()">
+                    {{ navbar_selected_adresName or "Adres seç" }}
+                </button>
+            
+                <div id="address-menu" class="address-dropdown">
+                    {% if navbar_adresler %}
+                    {% for a in navbar_adresler %}
+                    {# a: (adresName,) #}
+                    <form action="/adres/sec" method="post" class="address-dropdown-item">
+                        <input type="hidden" name="adresName" value="{{ a[0] }}">
+                        <button type="submit">
+                            {{ a[0] }}
+                        </button>
+                    </form>
+                    {% endfor %}
+                    {% else %}
+                    <div class="address-dropdown-empty">
+                        Kayıtlı adres yok
+                    </div>
+                    {% endif %}
+            
+                    <!-- + Yeni adres ekle -->
+                    <a href="/addAdress" class="address-dropdown-add">
+                        ➕ Yeni adres ekle
+                    </a>
+                </div>
+            </div>
+        </div>
+    
         <div class="navbar-right">
-            <!-- PROFİL MENÜSÜ AÇILACAK ICON -->
+            <button class="cart-icon" onclick="window.location.href='/HomePage-Sepetbutton'">
+                🛒
+            </button>
+    
             <button type="button" class="profile-icon" onclick="toggleProfileMenu()" title="Profil">
                 👤
             </button>
-
-            <!-- GİRİŞ TÜRÜ MENÜSÜ (ESKİ HAMBURGER) -->
+    
             <div class="hamburger" onclick="toggleMenu()">
                 <div></div>
                 <div></div>
                 <div></div>
             </div>
         </div>
-
-        <!-- GİRİŞ TÜRÜ MENÜSÜ -->
+    
+        <!-- giriş türü menüsü -->
         <div id="menu" class="dropdown-menu">
             <a href="/login">Efendi Giriş</a>
             <a href="/restoranLogin">Restoran Giriş</a>
             <a href="/kuryeLogin">Kurye Giriş</a>
         </div>
-
-        <!-- PROFİL MENÜSÜ -->
+    
+        <!-- profil menüsü -->
         <div id="profile-menu" class="dropdown-menu profile-menu">
             <a href="/profilim">Profilim</a>
             <a href="/adreslerim">Adreslerim</a>
@@ -59,11 +89,11 @@
         function toggleMenu() {
             const menu = document.getElementById("menu");
             const profileMenu = document.getElementById("profile-menu");
+            const addressMenu = document.getElementById("address-menu");
 
-            // Profil menüsü açıksa kapat
             if (profileMenu) profileMenu.style.display = "none";
+            if (addressMenu) addressMenu.style.display = "none";
 
-            // Ana menüyü toggle et
             if (menu.style.display === "flex") {
                 menu.style.display = "none";
             } else {
@@ -74,15 +104,30 @@
         function toggleProfileMenu() {
             const profileMenu = document.getElementById("profile-menu");
             const menu = document.getElementById("menu");
+            const addressMenu = document.getElementById("address-menu");
 
-            // Giriş menüsü açıksa kapat
             if (menu) menu.style.display = "none";
+            if (addressMenu) addressMenu.style.display = "none";
 
-            // Profil menüsünü toggle et
             if (profileMenu.style.display === "flex") {
                 profileMenu.style.display = "none";
             } else {
                 profileMenu.style.display = "flex";
+            }
+        }
+
+        function toggleAddressMenu() {
+            const addressMenu = document.getElementById("address-menu");
+            const menu = document.getElementById("menu");
+            const profileMenu = document.getElementById("profile-menu");
+
+            if (menu) menu.style.display = "none";
+            if (profileMenu) profileMenu.style.display = "none";
+
+            if (addressMenu.style.display === "flex") {
+                addressMenu.style.display = "none";
+            } else {
+                addressMenu.style.display = "flex";
             }
         }
     </script>
