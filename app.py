@@ -52,6 +52,7 @@ def login_required(logintype=TYPES.E):
     return decorator
 
 def login(user_id,as_):
+    session.clear()
     session["logged_in"] = True
     session["version"] = session_version
     session["login_time"] = time.time()
