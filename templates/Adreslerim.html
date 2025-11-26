@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Adreslerim · Tekne Ekmeği{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Adreslerim</h1>
+    <p class="subtitle">Teslimat adreslerini buradan yönetebilir, düzenleyebilir veya seçebilirsin.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% if adresler %}
+    <div class="address-list">
+        {% for a in adresler %}
+        {# a: (adresName, il, ilce, mah, cd, binano, daireno) #}
+        <div class="address-row">
+            <div class="address-info">
+                <div class="address-name">
+                    {{ a[0] }}
+                </div>
+                <div class="address-meta">
+                    {{ a[3] }} Mah., {{ a[4] }} Cd.,
+                    {{ a[5] }}/{{ a[6] }} – {{ a[2] }}/{{ a[1] }}
+                </div>
+            </div>
+            <div class="address-actions">
+                <form action="/adres/duzenle" method="get">
+                    <input type="hidden" name="adresName" value="{{ a[0] }}">
+                    <button type="submit" class="btn btn-primary btn-sm">Düzenle</button>
+                </form>
+            
+                <form action="/adres/sil" method="post" onsubmit="return confirm('Bu adresi silmek istediğine emin misin?');">
+                    <input type="hidden" name="adresName" value="{{ a[0] }}">
+                    <button type="submit" class="btn btn-primary btn-sm">Sil</button>
+                </form>
+            
+                <form action="/adres/sec" method="post">
+                    <input type="hidden" name="adresName" value="{{ a[0] }}">
+                    {% if selected_name == a[0] %}
+                    <button type="submit" class="btn btn-secondary btn-sm" disabled>
+                        Seçildi
+                    </button>
+                    {% else %}
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        Seç
+                    </button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="subtitle">Henüz kayıtlı bir adresin yok.</p>
+    {% endif %}
+
+    <form action="/addAdress" method="get">
+        <button type="submit" class="btn btn-primary">Yeni Adres Ekle</button>
+    </form>
+</div>
+{% endblock %}

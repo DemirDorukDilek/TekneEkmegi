@@ -11,21 +11,43 @@
 <body>
 
     <header class="navbar">
-        <a href="/login" class="navbar-logo" style="text-decoration:none; color:inherit;">
-            Tekne Ekmeği
+        <a href="/HomePage" class="navbar-logo"
+            style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:8px;">
+            <img src="{{ url_for('static', filename='tekne_logo.png') }}" alt="Logo"
+                style="height:80px; width:auto; border-radius:4px;">
+            <span style="font-weight:600;">Tekne Ekmeği</span>
         </a>
 
-        <div class="hamburger" onclick="toggleMenu()">
-            <div></div>
-            <div></div>
-            <div></div>
+        <div class="navbar-right">
+            <!-- PROFİL MENÜSÜ AÇILACAK ICON -->
+            <button type="button" class="profile-icon" onclick="toggleProfileMenu()" title="Profil">
+                👤
+            </button>
+
+            <!-- GİRİŞ TÜRÜ MENÜSÜ (ESKİ HAMBURGER) -->
+            <div class="hamburger" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
         </div>
 
+        <!-- GİRİŞ TÜRÜ MENÜSÜ -->
         <div id="menu" class="dropdown-menu">
-            <!-- BURASI ÖNEMLİ: FLASK ROTALARIYLA AYNI OLMALI -->
             <a href="/login">Efendi Giriş</a>
             <a href="/restoranLogin">Restoran Giriş</a>
             <a href="/kuryeLogin">Kurye Giriş</a>
+        </div>
+
+        <!-- PROFİL MENÜSÜ -->
+        <div id="profile-menu" class="dropdown-menu profile-menu">
+            <a href="/profilim">Profilim</a>
+            <a href="/adreslerim">Adreslerim</a>
+            <a href="/odemeYontemlerim">Ödeme yöntemlerim</a>
+            <a href="/gecmisSiparislerim">Geçmiş siparişlerim</a>
+            <a href="/kuponlarim">Kuponlarım</a>
+            <a href="/yardim">Yardım merkezi</a>
+            <a href="/logout">Çıkış yap</a>
         </div>
     </header>
 
@@ -36,10 +58,31 @@
     <script>
         function toggleMenu() {
             const menu = document.getElementById("menu");
+            const profileMenu = document.getElementById("profile-menu");
+
+            // Profil menüsü açıksa kapat
+            if (profileMenu) profileMenu.style.display = "none";
+
+            // Ana menüyü toggle et
             if (menu.style.display === "flex") {
                 menu.style.display = "none";
             } else {
                 menu.style.display = "flex";
+            }
+        }
+
+        function toggleProfileMenu() {
+            const profileMenu = document.getElementById("profile-menu");
+            const menu = document.getElementById("menu");
+
+            // Giriş menüsü açıksa kapat
+            if (menu) menu.style.display = "none";
+
+            // Profil menüsünü toggle et
+            if (profileMenu.style.display === "flex") {
+                profileMenu.style.display = "none";
+            } else {
+                profileMenu.style.display = "flex";
             }
         }
     </script>

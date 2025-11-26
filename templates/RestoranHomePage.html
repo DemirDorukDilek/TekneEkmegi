@@ -1,11 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Restoran Ana Sayfa · Tekne Ekmeği{% endblock %}
+{% block title %}Restoran Paneli · Tekne Ekmeği{% endblock %}
 
 {% block content %}
 <div class="card">
     <h1>Restoran Paneli</h1>
     <p class="subtitle">Menünü ve siparişlerini buradan yönet.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
 
     <form action="/addYemek" method="get">
         <button type="submit" class="btn btn-primary">Yeni Yemek Ekle</button>

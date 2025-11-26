@@ -1,3 +1,7 @@
+/* =========================================================
+   TEKNE EKMEĞİ – KREM ARKAPLAN + AHŞAP NAVBAR + LACİVERT BUTON
+   ========================================================= */
+
 /* ---------- GENEL AYARLAR ---------- */
 
 * {
@@ -9,37 +13,65 @@ body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background-color: #2b2b2b;
-    /* koyu gri arka plan */
-    color: #f5e9d3;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #f4f1ea;
+    /* krem arkaplan */
+    color: #2d2d2d;
+    /* koyu gri yazı */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     overflow-x: hidden;
-    /* sağa sola kaymayı engelle */
 }
 
-/* ---------- NAVBAR ---------- */
+/* Renk paleti */
+:root {
+    --accent: #d8a451;
+    /* altın sarısı */
+    --accent-dark: #b68637;
+    --accent-light: #f6dfb8;
+
+    --button: #23304a;
+    /* lacivert */
+    --button-hover: #2f3f63;
+
+    --card-bg: #ffffff;
+    /* beyaz kart */
+    --input-bg: #faf8f2;
+    /* krem input arka plan */
+    --border-soft: #dcd6c8;
+    --text-muted: #6b7280;
+}
+
+/* =========================================================
+   NAVBAR – AHŞAP ARKA PLAN 
+   ========================================================= */
 
 .navbar {
     width: 100%;
     padding: 14px 20px;
-    background: #1e140c;
-    /* koyu kahve üst panel */
-    color: #d8a451;
-    /* altın sarısı */
+    background: url("../static/navbar_wood.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    color: var(--accent-light);
+
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #3b2a1f;
-    box-sizing: border-box;
+
+    border-bottom: 2px solid rgba(0, 0, 0, 0.25);
     position: relative;
+
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+    /* okunabilirlik */
 }
 
 .navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 22px;
     font-weight: 700;
-    letter-spacing: 1px;
-    color: #d8a451;
-    /* altın sarısı yazı */
+    color: #fffaf1;
 }
 
 /* ---------- HAMBURGER MENÜ ---------- */
@@ -55,81 +87,114 @@ body {
 .hamburger div {
     width: 100%;
     height: 3px;
-    background: #d8a451;
-    /* altın sarısı çizgiler */
+    background: #fff2d8;
     border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
-/* ---------- DROPDOWN MENÜ ---------- */
+/* ---------- DROPDOWN MENÜLER ---------- */
 
 .dropdown-menu {
     position: absolute;
     top: 58px;
     right: 20px;
-    background: #1e140c;
-    /* koyu kahve */
-    border: 1px solid #3b2a1f;
+
+    background: rgba(30, 30, 30, 0.85);
+    backdrop-filter: blur(4px);
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 10px;
+
     padding: 10px;
     display: none;
-    /* JS ile flex yapılacak */
     flex-direction: column;
     gap: 8px;
-    width: 180px;
-    z-index: 10;
+    width: 200px;
+    z-index: 20;
 }
 
 .dropdown-menu a {
-    color: #d8a451;
-    /* altın sarısı */
+    color: #fffaf1;
     text-decoration: none;
-    padding: 6px 10px;
+    padding: 8px 12px;
     border-radius: 6px;
     font-size: 14px;
 }
 
 .dropdown-menu a:hover {
-    background: #3b2a1f;
+    background: rgba(255, 255, 255, 0.12);
 }
 
-/* ---------- SAYFA İÇERİĞİ ---------- */
+.profile-menu {
+    right: 60px;
+}
+
+/* ---------- NAVBAR SAĞ TARAF / PROFİL ---------- */
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #fff2d8;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+    color: #fff2d8;
+    cursor: pointer;
+
+    background: rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(2px);
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.profile-icon:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* =========================================================
+   KARTLAR – FORM – SAYFA İÇİ
+   ========================================================= */
 
 .page-container {
     display: flex;
     justify-content: center;
     align-items: flex-start;
     padding: 40px 16px;
-    box-sizing: border-box;
 }
 
-/* ---------- KART (FORM KUTUSU) ---------- */
-
 .card {
-    background: #3b2a1f;
-    /* koyu kahve kutu */
+    background: var(--card-bg);
     border-radius: 14px;
     padding: 26px 30px;
-    color: #f5e9d3;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    color: #2d2d2d;
+    border: 1px solid var(--border-soft);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
     width: 100%;
     max-width: 420px;
-    /* sabit max genişlik */
-    box-sizing: border-box;
 }
 
 .card h1 {
     margin-top: 0;
     margin-bottom: 12px;
     font-size: 22px;
-    color: #d8a451;
-    /* altın sarısı başlık */
+    color: var(--button);
 }
 
 .card p.subtitle {
     margin-top: 0;
     margin-bottom: 18px;
     font-size: 14px;
-    color: #e0d0b0;
+    color: var(--text-muted);
 }
 
 /* ---------- FORM ELEMANLARI ---------- */
@@ -142,7 +207,7 @@ label {
     display: block;
     margin-bottom: 6px;
     font-size: 13px;
-    color: #f5e9d3;
+    color: #2d2d2d;
 }
 
 input[type="text"],
@@ -153,23 +218,24 @@ input[type="tel"] {
     width: 100%;
     padding: 8px 10px;
     border-radius: 8px;
-    border: 1px solid #d8a451;
-    background: #1e140c;
-    color: #f5e9d3;
+    border: 1px solid var(--border-soft);
+    background: var(--input-bg);
+    color: #2d2d2d;
     font-size: 14px;
-    box-sizing: border-box;
 }
 
 input::placeholder {
-    color: #bfa78a;
+    color: #b1a591;
 }
 
 input:focus {
     outline: none;
-    border-color: #e5b76a;
+    border-color: var(--accent);
 }
 
-/* ---------- BUTONLAR ---------- */
+/* =========================================================
+   BUTONLAR – LACİVERT
+   ========================================================= */
 
 .btn {
     width: 100%;
@@ -177,33 +243,103 @@ input:focus {
     border-radius: 8px;
     border: none;
     font-size: 15px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     margin-top: 8px;
-    box-sizing: border-box;
 }
 
 .btn-primary {
-    background: #d8a451;
-    /* altın sarısı */
-    color: #1e140c;
+    background: var(--button);
+    color: #ffffff;
 }
 
 .btn-primary:hover {
-    background: #e5b76a;
+    background: var(--button-hover);
 }
 
 .btn-secondary {
     background: transparent;
-    border: 1px solid #d8a451;
-    color: #d8a451;
+    border: 1px solid var(--accent);
+    color: var(--accent);
 }
 
 .btn-secondary:hover {
-    background: #1e140c;
+    background: rgba(0, 0, 0, 0.05);
 }
 
-/* ---------- RESPONSIVE KÜÇÜK EKRAN ---------- */
+.btn-sm {
+    width: auto;
+    padding-inline: 10px;
+    font-size: 12px;
+}
+
+/* =========================================================
+   RESTORAN / ADRES LİSTELERİ
+   ========================================================= */
+
+.restaurant-list,
+.address-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 16px 0 20px 0;
+}
+
+.restaurant-card,
+.address-row {
+    display: flex;
+    justify-content: space-between;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-soft);
+    gap: 10px;
+}
+
+.restaurant-name,
+.address-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #23304a;
+}
+
+.restaurant-meta,
+.address-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.address-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/* =========================================================
+   FLASH MESAJLARI
+   ========================================================= */
+
+.flash-message {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.flash-success {
+    background: #e5ffe5;
+    color: #0f6f29;
+    border: 1px solid #30a44b;
+}
+
+.flash-danger {
+    background: #ffe5e5;
+    color: #972525;
+    border: 1px solid #e34d4d;
+}
+
+/* ---------- RESPONSIVE ---------- */
 
 @media (max-width: 480px) {
     .page-container {

@@ -68,8 +68,28 @@ def index_get():
 @app.route("/HomePage")
 @login_required(TYPES.E)
 def HomePage_Get():
-    print(sql_querry("sql/RestoranListele.sql",(session["user_id"],)))
-    return render_template("HomePage.html")
+    user_id = session["user_id"]
+
+    # Restoranlar (eski davranış aynen kalsın)
+    restoranlar = sql_querry("sql/RestoranListele.sql", (user_id,)) or []
+
+    # Seçili adres
+    selected_name = session.get("selected_adresName")
+    selected_adres = None
+    if selected_name:
+        rows = sql_querry(
+            "SELECT adresName, il, ilce, mah, cd, binano, daireno "
+            "FROM Adres WHERE efendiID = %s AND adresName = %s",
+            (user_id, selected_name)
+        ) or []
+        if rows:
+            selected_adres = rows[0]
+
+    return render_template(
+        "HomePage.html",
+        restoranlar=restoranlar,
+        selected_adres=selected_adres
+    )
 
 @app.route("/RestoranHomePage")
 @login_required(TYPES.R)
@@ -81,11 +101,151 @@ def RestoranHomePage_get():
 def homepage_button():
     return redirect("/login")
 
+@app.route("/profilim")
+@login_required(TYPES.E)
+def profilim_get():
+    # İleride burada efendi bilgilerini DB'den çekebiliriz.
+    return render_template("Profilim.html")
+
+
+@app.route("/odemeYontemlerim")
+@login_required(TYPES.E)
+def odeme_yontemlerim_get():
+    return render_template("OdemeYontemlerim.html")
+
+
+@app.route("/gecmisSiparislerim")
+@login_required(TYPES.E)
+def gecmis_siparislerim_get():
+    # İleride gerçek siparişleri buraya bağlarız
+    return render_template("GecmisSiparislerim.html")
+
+
+@app.route("/kuponlarim")
+@login_required(TYPES.E)
+def kuponlarim_get():
+    # Sonra DB'den kupon listesi çekilebilir
+    return render_template("Kuponlarim.html")
+
+
+@app.route("/yardim")
+@login_required(TYPES.E)
+def yardim_get():
+    return render_template("Yardim.html")
+
+
+@app.route("/logout")
+def logout_get():
+    session.clear()
+    flash("Çıkış yapıldı.", "success")
+    return redirect("/login")
 
 @app.route("/addAdress")
 @login_required(TYPES.E)
 def addAdress_get():
     return render_template("addAdress.html")
+
+@app.route("/adreslerim")
+@login_required(TYPES.E)
+def adreslerim_get():
+    user_id = session["user_id"]
+
+    adresler = sql_querry(
+        "SELECT adresName, il, ilce, mah, cd, binano, daireno FROM Adres WHERE efendiID = %s",
+        (user_id,)
+    ) or []
+
+    selected_name = session.get("selected_adresName")
+
+    return render_template("Adreslerim.html", adresler=adresler, selected_name=selected_name)
+
+@app.route("/adres/sec", methods=["POST"])
+@login_required(TYPES.E)
+def adres_sec_post():
+    user_id = session["user_id"]
+    adres_name = request.form["adresName"]
+
+    rows = sql_querry(
+        "SELECT adresName FROM Adres WHERE efendiID = %s AND adresName = %s",
+        (user_id, adres_name)
+    ) or []
+
+    if not rows:
+        flash("Adres bulunamadı.", "danger")
+    else:
+        session["selected_adresName"] = adres_name
+        flash(f"Seçili adres güncellendi: {adres_name}", "success")
+
+    return redirect("/adreslerim")
+
+@app.route("/adres/sil", methods=["POST"])
+@login_required(TYPES.E)
+def adres_sil_post():
+    user_id = session["user_id"]
+    adres_name = request.form["adresName"]
+
+    try:
+        sql_querry(
+            "DELETE FROM Adres WHERE efendiID = %s AND adresName = %s",
+            (user_id, adres_name)
+        )
+        flash("Adres silindi.", "success")
+    except sql.Error as err:
+        flash(f"Adres silinirken bir hata oluştu: {err}", "danger")
+
+    return redirect("/adreslerim")
+
+@app.route("/adres/duzenle", methods=["GET"])
+@login_required(TYPES.E)
+def adres_duzenle_get():
+    user_id = session["user_id"]
+    adres_name = request.args.get("adresName")
+
+    rows = sql_querry(
+        "SELECT adresName, il, ilce, mah, cd, binano, daireno FROM Adres WHERE efendiID = %s AND adresName = %s",
+        (user_id, adres_name)
+    ) or []
+
+    if not rows:
+        flash("Adres bulunamadı.", "danger")
+        return redirect("/adreslerim")
+
+    adres = rows[0]  # tuple
+
+    return render_template("AdresDuzenle.html", adres=adres)
+
+@app.route("/adres/duzenle", methods=["POST"])
+@login_required(TYPES.E)
+def adres_duzenle_post():
+    user_id = session["user_id"]
+    old_name = request.form["old_adresName"]
+
+    def temizle(s):
+        if s is None:
+            return None
+        return s.strip().strip("'").strip('"')
+
+    new_name = temizle(request.form["name"])
+    il = temizle(request.form["il"])
+    ilce = temizle(request.form["ilce"])
+    mahalle = temizle(request.form.get("Mahalle"))
+    cadde = temizle(request.form.get("Cadde"))
+    bina_no = temizle(request.form.get("binano"))
+    daire_no = temizle(request.form.get("daireno"))
+
+    try:
+        sql_querry(
+            "UPDATE Adres SET adresName=%s, il=%s, ilce=%s, mah=%s, cd=%s, binano=%s, daireno=%s "
+            "WHERE efendiID=%s AND adresName=%s",
+            (new_name, il, ilce, mahalle, cadde, bina_no, daire_no, user_id, old_name)
+        )
+        flash("Adres güncellendi.", "success")
+    except sql.IntegrityError:
+        flash("Bu isimde zaten bir adresiniz var. Lütfen farklı bir isim kullanın.", "danger")
+    except sql.Error as err:
+        flash(f"Adres güncellenirken bir hata oluştu: {err}", "danger")
+
+    return redirect("/adreslerim")
 
 @app.route("/addYemek")
 @login_required(TYPES.R)
@@ -274,9 +434,14 @@ def efendiAddAdress_post():
             sql_querry("sql/efendiAddAdress.sql",(user_id, adres_adi, il,ilce, mahalle, cadde, bina_no, daire_no, latitude, longitude))
             flash("Adres başarıyla eklendi!", "success")
             return redirect("/HomePage")
-    
+
+        except sql.IntergrityError:
+            flash("Bu isimde bir adres zaten kayıtlı. Lütfen farklı bir adres adı girin.", "danger")
+            return redirect("/addAdress");
+
         except sql.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
+            return redirect("/addAdress");
     
     return redirect("/addAdress")
 
@@ -295,7 +460,6 @@ def addYemek_post():
 
     return redirect("/addYemek")
     
-
 
 
     
