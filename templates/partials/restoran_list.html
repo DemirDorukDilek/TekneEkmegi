@@ -1,0 +1,24 @@
+{% if restoranlar %}
+<div class="restaurant-list">
+    {% for row in restoranlar %}
+    {# row: (restoranID, EfendiID, distSqr, restoranAdi) #}
+    <div class="restaurant-card">
+        <div class="restaurant-card-info">
+            <div class="restaurant-name">{{ row[3] }}</div>
+            <div class="restaurant-meta">
+                Mesafe: {{ "%.2f"|format(row[2]) }} km
+            </div>
+        </div>
+
+        <form action="/restoranSec" method="post">
+            <input type="hidden" name="restoranID" value="{{ row[0] }}">
+            <button type="submit" class="btn btn-primary btn-sm">
+                Menüyü Gör
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="subtitle">Yakınında restoran bulunamadı.</p>
+{% endif %}

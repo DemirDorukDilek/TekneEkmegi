@@ -122,12 +122,21 @@ def HomePage_Get():
         if rows:
             selected_adres = rows[0]
 
-    return render_template(
-        "HomePage.html",
-        restoranlar=restoranlar,
-        selected_adres=selected_adres
-    )
+    return render_template("HomePage.html",restoranlar=restoranlar,selected_adres=selected_adres)
 
+@app.route('/restoranFiltre', methods=['POST'])
+def restoran_filtre():
+    user_id = session["user_id"]
+    data = request.get_json()
+    filitre = (data.get('filitre',"")).strip()
+
+    if filitre:
+        restoranlar = sql_querry("sql/RestoranListele2.sql", (user_id,f"%{filitre}%")) or []
+    else:
+        restoranlar = sql_querry("sql/RestoranListele.sql", (user_id,)) or []
+    restoranlar = list(map(lambda x: [x[0], x[1], x[2]**0.5, x[3]], restoranlar))
+
+    return render_template("partials/restoran_list.html", restoranlar=restoranlar)
 
 @app.route("/RestoranHomePage")
 @login_required(TYPES.R)
