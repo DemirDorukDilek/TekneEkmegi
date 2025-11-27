@@ -154,7 +154,7 @@ def odeme_yontemlerim_get():
 @login_required(TYPES.E)
 def gecmis_siparislerim_get():
     efendiID = session.get("user_id")
-    siparisler = sql_querry("sql/Siparis/siparislerimListele.sql", (efendiID,)) or []
+    siparisler = sql_querry("sql/SiparisVerme/siparislerimListele.sql", (efendiID,)) or []
     return render_template("GecmisSiparislerim.html", siparisler=siparisler)
 
 
@@ -414,7 +414,7 @@ def sepete_ekle():
     
     try:
         # 4 parametre: efendiID, yemekID, adet (INSERT), adet (UPDATE)
-        result = sql_querry("sql/Siparis/sepeteEkle.sql", (efendiID, yemekID, adet, adet))
+        result = sql_querry("sql/Siparis/Sepeteekle.sql", (efendiID, yemekID, adet, adet))
         print(f"DEBUG - SQL result: {result}")
         
         flash(f"{adet} adet ürün sepete eklendi!", "success")
@@ -435,7 +435,7 @@ def sepete_ekle():
 @login_required(TYPES.E)
 def sepetim_get():
     efendiID = session.get("user_id")
-    sepet_urunler = sql_querry("sql/Siparis/sepetiGetir.sql", (efendiID,))
+    sepet_urunler = sql_querry("sql/Siparis/Sepetigetir.sql", (efendiID,))
     return render_template("Sepet.html", sepet_urunler=sepet_urunler)
 
 
@@ -446,7 +446,7 @@ def sepetten_sil():
         efendiID = session.get("user_id")
         yemekID = request.form.get("yemekID")
         
-        sql_querry("sql/Siparis/sepettenSil.sql", (efendiID, yemekID))
+        sql_querry("sql/Siparis/Sepettensil.sql", (efendiID, yemekID))
         
         flash("Ürün sepetten silindi.", "success")
         
@@ -459,11 +459,13 @@ def sepetten_sil():
 @app.route("/siparisOlustur", methods=["POST"])
 @login_required(TYPES.E)
 def siparis_olustur():
+    conn = None
+    cursor = None
     try:
         efendiID = session.get("user_id")
         
         # 1. Sepetteki ürünleri al
-        sepet_urunler = sql_querry("sql/Siparis/sepetiGetir.sql", (efendiID,))
+        sepet_urunler = sql_querry("sql/Siparis/Sepetigetir.sql", (efendiID,))
         
         if not sepet_urunler:
             flash("Sepetiniz boş!", "danger")
@@ -487,40 +489,48 @@ def siparis_olustur():
             restoranlar[restoranID].append(urun)
         
         # 5. Her restoran için ayrı sipariş oluştur
+        from config import DB_CONFIG
+        import mysql.connector as sql
+        
+        conn = sql.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        
         siparis_numaralari = []
         for restoranID, urunler in restoranlar.items():
             # Sipariş oluştur
-            sql_querry("sql/Siparis/siparisOlustur.sql", (efendiID, selected_adres))
+            cursor.execute("INSERT INTO sparis(efendiID, teslimAdres, durum) VALUES (%s, %s, 'Get')", (efendiID, selected_adres))
             
             # Son oluşturulan sipariş numarasını al
-            result = sql_querry("sql/Siparis/sonSiparisNo.sql", ())
-            sparisNo = result[0][0]
+            sparisNo = cursor.lastrowid
             siparis_numaralari.append(sparisNo)
             
             # Sipariş ürünlerini kaydet
             for urun in urunler:
                 yemekID = urun[0]
                 adet = urun[3]
-                sql_querry("sql/Siparis/siparisUrunEkle.sql", (sparisNo, yemekID, adet))
+                cursor.execute("INSERT INTO sparisUrunler(sparisNo, yemekID, adet) VALUES (%s, %s, %s)",(sparisNo, yemekID, adet))
             
             # Bu restoran için ürünlerin toplam fiyatını hesapla
             restoran_toplam = sum(urun[2] * urun[3] for urun in urunler)
             
-            # Nakit ödeme kaydı oluştur (varsayılan)
-            sql_querry("sql/Siparis/nakitOdemeEkle.sql", (sparisNo, restoran_toplam))
+            # Nakit ödeme kaydı oluştur
+            cursor.execute("INSERT INTO nakitOdeme(sparisNo, odemeDate, price) VALUES (%s, CURDATE(), %s)",(sparisNo, restoran_toplam))
             
             # En yakın kuryeyi bul ve ata
-            kurye_result = sql_querry("sql/Siparis/enYakinKuryeBul.sql", (restoranID,))
+            kurye_result = sql_querry("sql/kurye/Enyakinkuryebul.sql", (restoranID,))
             
             if kurye_result and len(kurye_result) > 0:
                 kuryeID = kurye_result[0][0]
-                sql_querry("sql/Siparis/kuryeAta.sql", (kuryeID, sparisNo))
+                cursor.execute("UPDATE sparis SET kuryeID = %s, durum = 'Cook' WHERE sparisNo = %s",(kuryeID, sparisNo))
                 print(f"Sipariş {sparisNo} için kurye {kuryeID} atandı")
             else:
                 print(f"Sipariş {sparisNo} için müsait kurye bulunamadı")
         
+        # Commit yap
+        conn.commit()
+        
         # 6. Sepeti temizle
-        sql_querry("sql/Siparis/sepetiTemizle.sql", (efendiID,))
+        sql_querry("sql/Siparis/Sepetitemizle.sql", (efendiID,))
         
         # 7. Başarı mesajı
         siparis_str = ", ".join(map(str, siparis_numaralari))
@@ -530,11 +540,19 @@ def siparis_olustur():
         return redirect("/HomePage")
         
     except Exception as e:
+        if conn:
+            conn.rollback()
         print(f"Sipariş oluşturma hatası: {e}")
         import traceback
         traceback.print_exc()
         flash(f"Sipariş oluşturulurken hata oluştu: {e}", "danger")
         return redirect("/sepetim")
+    
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 # ============================================
@@ -581,8 +599,7 @@ def register_post():
         hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256")
 
         try:
-            sql_querry("sql/Login_Register/EfendiSignIn.sql",
-                      (name, surname, telno, make_null(email), hashed_password))
+            sql_querry("sql/Login_Register/EfendiSignIn.sql",(name, surname, telno, make_null(email), hashed_password))
             flash("Kayıt başarıyla tamamlandı!", "success")
             return redirect("/login")
 
@@ -649,8 +666,7 @@ def RestoranRegister_post():
         hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256")
 
         try:
-            sql_querry("sql/Login_Register/RestoranRegister.sql",
-                      (name, telno, adres, minsepet, hashed_password, latitude, longitude))
+            sql_querry("sql/Login_Register/RestoranRegister.sql",(name, telno, adres, minsepet, hashed_password, latitude, longitude))
             flash("Kayıt başarıyla tamamlandı!", "success")
             return redirect("/restoranLogin")
 
@@ -672,8 +688,7 @@ def kuryeregister_post():
         hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256")
 
         try:
-            sql_querry("sql/Login_Register/KuryeRegister.sql",
-                      (name, surname, telno, make_null(email), hashed_password))
+            sql_querry("sql/Login_Register/KuryeRegister.sql", (name, surname, telno, make_null(email), hashed_password))
             flash("Kayıt başarıyla tamamlandı!", "success")
             return redirect("/kuryeLogin")
 
