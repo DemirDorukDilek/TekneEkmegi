@@ -12,30 +12,34 @@
 {% endif %}
 {% endwith %}
 
-<h2 style="margin: 0 0 8px;">Yakındaki Restoranlar</h2>
+<div class="card" style="max-width: 600px;">
+    <h1>Yakındaki Restoranlar</h1>
+    <p class="subtitle">En yakın restoranları listele ve sipariş ver.</p>
 
-{% if restoranlar %}
-<div class="restaurant-list">
-    {% for row in restoranlar %}
-    {# row: (restoranID, EfendiID, distSqr) #}
-    <form action="/restoran/{{row[0]}}" method="get" class="restaurant-card">
-        <input type="hidden" name="restoranID" value="{{ row[0] }}">
-
-        <div class="restaurant-card-info">
-            <div class="restaurant-name">Restoran {{ row[3] }}</div>
-            <div class="restaurant-meta">
-                Mesafe: {{ row[2] }}
+    {% if restoranlar %}
+    <div class="restaurant-list">
+        {% for row in restoranlar %}
+        {# row: (restoranID, EfendiID, distSqr, restoranAdi) #}
+        <div class="restaurant-card">
+            <div class="restaurant-card-info">
+                <div class="restaurant-name">{{ row[3] }}</div>
+                <div class="restaurant-meta">
+                    Mesafe: {{ "%.2f"|format(row[2]) }} km
+                </div>
             </div>
-        </div>
 
-        <button type="submit" class="btn btn-secondary btn-sm">
-            Seç
-        </button>
-    </form>
-    {% endfor %}
+            <form action="/restoranSec" method="post">
+                <input type="hidden" name="restoranID" value="{{ row[0] }}">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    Menüyü Gör
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="subtitle">Yakınında restoran bulunamadı.</p>
+    {% endif %}
 </div>
-{% else %}
-<p class="subtitle">Yakınında restoran bulunamadı.</p>
-{% endif %}
 
 {% endblock %}

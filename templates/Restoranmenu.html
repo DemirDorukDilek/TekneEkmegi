@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}{{ restoran[1] }} · Tekne Ekmeği{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px;">
+    <h1>{{ restoran[1] }}</h1>
+    <p class="subtitle">Minimum sepet tutarı: {{ "%.2f"|format(restoran[4]) }} ₺</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <h2 style="margin-top: 24px; color: #d8a451; font-size: 18px;">Menü</h2>
+    
+    {% if yemekler and yemekler|length > 0 %}
+        <div style="margin-top: 12px;">
+            {% for yemek in yemekler %}
+            {# yemek: (ID, name, price) #}
+            <div style="background: #ffffff; padding: 14px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #dcd6c8; display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 15px; color: #23304a;">{{ yemek[1] }}</div>
+                    <div style="color: #d8a451; font-weight: 600; margin-top: 4px;">{{ "%.2f"|format(yemek[2]) }} ₺</div>
+                </div>
+                
+                <form action="/sepeteEkle" method="post" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="hidden" name="yemekID" value="{{ yemek[0] }}">
+                    <input type="hidden" name="restoranID" value="{{ restoran[0] }}">
+                    
+                    <input type="number" name="adet" value="1" min="1" max="99" 
+                           style="width: 60px; padding: 6px; border-radius: 6px; border: 1px solid #dcd6c8; text-align: center;">
+                    
+                    <button type="submit" class="btn btn-primary btn-sm" style="margin: 0;">
+                        Sepete Ekle
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="color: #6b7280; margin-top: 12px; font-size: 14px;">Bu restoranda henüz yemek yok.</p>
+    {% endif %}
+
+    <div style="margin-top: 24px; display: flex; gap: 8px;">
+        <form action="/HomePage" method="get" style="flex: 1;">
+            <button type="submit" class="btn btn-secondary">Geri Dön</button>
+        </form>
+        
+        <form action="/sepetim" method="get" style="flex: 1;">
+            <button type="submit" class="btn btn-primary">Sepetim 🛒</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
