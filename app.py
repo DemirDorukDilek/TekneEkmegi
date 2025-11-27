@@ -423,11 +423,12 @@ def sepete_ekle():
     print(f"  restoranID: {restoranID}, type: {type(restoranID)}")
     
     try:
-        # 4 parametre: efendiID, yemekID, adet (INSERT), adet (UPDATE)
         result = sql_querry("sql/Siparis/sepeteEkle.sql", (efendiID, yemekID, adet, adet))
         print(f"DEBUG - SQL result: {result}")
-        if adet<0:flash(f"{-adet} adet ürün sepetten silindi!", "success")
-        else:flash(f"{adet} adet ürün sepete eklendi!", "success")
+        if adet<0:
+            flash(f"{-adet} adet ürün sepetten silindi!", "success")
+        else:
+            flash(f"{adet} adet ürün sepete eklendi!", "success")
         print("DEBUG - Flash mesajı başarılı eklendi")
         
     except Exception as e:

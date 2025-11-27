@@ -88,7 +88,8 @@ CREATE TABLE sepetUrunler(
 
     CONSTRAINT PK PRIMARY KEY(efendiID,yemekID),
     CONSTRAINT sepetUrunlerFKefendiID FOREIGN KEY(efendiID) REFERENCES efendi(ID),
-    CONSTRAINT sepetUrunlerFKyemekID FOREIGN KEY(yemekID) REFERENCES yemek(ID)
+    CONSTRAINT sepetUrunlerFKyemekID FOREIGN KEY(yemekID) REFERENCES yemek(ID),
+    CONSTRAINT postiveAdet CHECK adet>0
 );
 
 
