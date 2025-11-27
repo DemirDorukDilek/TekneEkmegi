@@ -26,9 +26,11 @@ def sql_querry(querry,args):
         conn = get_db_connection()
         cursor = conn.cursor()
         code = read_file(querry) if os.path.isfile(querry) else querry
-        print(code)
-        print(args)
-        print(type(args))
+        with open("sql_querry_log","a",encoding="utf-8") as f:
+            f.write(code+"\n")
+            f.write(str(args)+"\n")
+            f.write(str(type(args))+"\n")
+            f.write("\n\n")
         cursor.execute(code, args)
         data = None
         if code.lower().startswith("select"):

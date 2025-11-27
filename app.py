@@ -2,7 +2,7 @@ from datetime import timedelta
 from functools import wraps
 import secrets
 import time
-from flask import Flask, render_template, request, redirect, flash, session
+from flask import Flask, render_template, request, redirect, flash, session,abort
 import mysql.connector as sql
 from werkzeug.security import generate_password_hash, check_password_hash
 from utils import *
@@ -45,10 +45,10 @@ def login_required(logintype=TYPES.E):
         def decorated_function(*args, **kwargs):
             info = check_session_validity()
             if not info["valid"]:
-                return info, 403
+                return abort(403, info)
             if session.get("as", "NULL") != logintype:
                 info = {"valid": False, "reason": "invalid_type", "message": "wrong User Type"}
-                return info, 403
+                return abort(403, info)
             return f(*args, **kwargs)
         return decorated_function
     return decorator
@@ -94,11 +94,14 @@ def inject_navbar_adresler():
 # ANA SAYFA VE YÖNLENDİRMELER
 # ============================================
 
+INDEX_MAP = {TYPES.E:["/login","/HomePage"],TYPES.R:["restoranLogin","/RestoranHomePage"], TYPES.K:["/kuryeLogin","/KuryeHomePage"]}
 @app.route("/")
 def index_get():
-    if check_session_validity()["valid"]:
-        return redirect("/HomePage")
-    return redirect("/login")
+    as_ = session.get("as",TYPES.E)
+    valid = 1 if check_session_validity()["valid"] else 0
+    return redirect(INDEX_MAP[as_][valid])
+    
+    
 
 
 @app.route("/HomePage")
@@ -414,8 +417,8 @@ def sepete_ekle():
         # 4 parametre: efendiID, yemekID, adet (INSERT), adet (UPDATE)
         result = sql_querry("sql/Siparis/sepeteEkle.sql", (efendiID, yemekID, adet, adet))
         print(f"DEBUG - SQL result: {result}")
-        
-        flash(f"{adet} adet ürün sepete eklendi!", "success")
+        if adet<0:flash(f"{-adet} adet ürün sepetten silindi!", "success")
+        else:flash(f"{adet} adet ürün sepete eklendi!", "success")
         print("DEBUG - Flash mesajı başarılı eklendi")
         
     except Exception as e:
@@ -424,7 +427,9 @@ def sepete_ekle():
         import traceback
         traceback.print_exc()
         flash(f"Sepete eklenirken hata oluştu: {e}", "danger")
-    
+
+    if (restoranID == "sepet"):
+        return redirect("/sepetim")
     print(f"DEBUG - Redirect ediliyor: /restoranSec?restoranID={restoranID}")
     return redirect(f"/restoranSec?restoranID={restoranID}")
 
@@ -434,6 +439,7 @@ def sepete_ekle():
 def sepetim_get():
     efendiID = session.get("user_id")
     sepet_urunler = sql_querry("sql/Siparis/sepetiGetir.sql", (efendiID,))
+    print(sepet_urunler)
     return render_template("Sepet.html", sepet_urunler=sepet_urunler)
 
 
@@ -524,8 +530,7 @@ def register_post():
         hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256")
 
         try:
-            sql_querry("sql/Login_Register/EfendiSignIn.sql",
-                      (name, surname, telno, make_null(email), hashed_password))
+            sql_querry("sql/Login_Register/EfendiSignIn.sql", (name, surname, telno, make_null(email), hashed_password))
             flash("Kayıt başarıyla tamamlandı!", "success")
             return redirect("/login")
 
@@ -544,13 +549,13 @@ def login_post():
         password = request.form["password"]
 
         try:
-            user_data = sql_querry("sql/Login_Register/EfendiLogin.sql", (identifier, identifier))[0]
-            if user_data is None:
+            user_data = sql_querry("sql/Login_Register/EfendiLogin.sql", (identifier, identifier))
+            if user_data == []:
                 flash("Telno/Email yanlış", "danger")
-            elif not check_password_hash(user_data[5], password):
+            elif not check_password_hash(user_data[0][5], password):
                 flash("Şifre yanlış", "danger")
             else:
-                login(user_data[0], "efendi")
+                login(user_data[0][0], "efendi")
                 return redirect("/HomePage")
 
         except sql.Error as err:
@@ -566,13 +571,13 @@ def RestoranLogin_post():
         password = request.form["password"]
 
         try:
-            user_data = sql_querry("sql/Login_Register/RestoranLogin.sql", (identifier,))[0]
-            if user_data is None:
+            user_data = sql_querry("sql/Login_Register/RestoranLogin.sql", (identifier,))
+            if user_data == []:
                 flash("Telno yanlış", "danger")
-            elif not check_password_hash(user_data[5], password):
+            elif not check_password_hash(user_data[0][5], password):
                 flash("Şifre yanlış", "danger")
             else:
-                login(user_data[0], "restoran")
+                login(user_data[0][0], "restoran")
                 return redirect("/RestoranHomePage")
         except sql.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
@@ -592,8 +597,7 @@ def RestoranRegister_post():
         hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256")
 
         try:
-            sql_querry("sql/Login_Register/RestoranRegister.sql",
-                      (name, telno, adres, minsepet, hashed_password, latitude, longitude))
+            sql_querry("sql/Login_Register/RestoranRegister.sql", (name, telno, adres, minsepet, hashed_password, latitude, longitude))
             flash("Kayıt başarıyla tamamlandı!", "success")
             return redirect("/restoranLogin")
 
@@ -615,8 +619,7 @@ def kuryeregister_post():
         hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256")
 
         try:
-            sql_querry("sql/Login_Register/KuryeRegister.sql",
-                      (name, surname, telno, make_null(email), hashed_password))
+            sql_querry("sql/Login_Register/KuryeRegister.sql", (name, surname, telno, make_null(email), hashed_password))
             flash("Kayıt başarıyla tamamlandı!", "success")
             return redirect("/kuryeLogin")
 
@@ -635,13 +638,13 @@ def kuryelogin_post():
         password = request.form["password"]
 
         try:
-            user_data = sql_querry("sql/Login_Register/KuryeLogin.sql", (identifier, identifier))[0]
-            if user_data is None:
+            user_data = sql_querry("sql/Login_Register/KuryeLogin.sql", (identifier, identifier))
+            if user_data == []:
                 flash("Telno/Email yanlış", "danger")
-            elif not check_password_hash(user_data[5], password):
+            elif not check_password_hash(user_data[0][5], password):
                 flash("Şifre yanlış", "danger")
             else:
-                login(user_data[0], "kurye")
+                login(user_data[0][0], "kurye")
                 return redirect("/KuryeHomePage")
 
         except sql.Error as err:
@@ -650,10 +653,14 @@ def kuryelogin_post():
         return redirect("/kuryeLogin")
 
 
+@app.errorhandler(403)
+def no403(e):
+    flash(f"Unvalid accses due to {e.description["message"]}", "danger")
+    return redirect("/")
+
 # ============================================
 # UYGULAMA BAŞLATMA
 # ============================================
 
-
 if __name__ == "__main__":
-    app.run("0.0.0.0", 3131, debug=True)
+    app.run("0.0.0.0", 3131)
