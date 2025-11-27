@@ -7,6 +7,7 @@ import mysql.connector as sql
 from werkzeug.security import generate_password_hash, check_password_hash
 from utils import *
 import os
+import traceback
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
@@ -463,78 +464,54 @@ def siparis_olustur():
     cursor = None
     try:
         efendiID = session.get("user_id")
-        
-        # 1. Sepetteki ürünleri al
         sepet_urunler = sql_querry("sql/Siparis/Sepetigetir.sql", (efendiID,))
         
         if not sepet_urunler:
             flash("Sepetiniz boş!", "danger")
             return redirect("/sepetim")
         
-        # 2. Seçili adresi kontrol et
         selected_adres = session.get("selected_adresName")
         if not selected_adres:
             flash("Lütfen önce bir teslimat adresi seçin!", "danger")
             return redirect("/adreslerim")
         
-        # 3. Toplam fiyatı hesapla
         toplam_fiyat = sum(urun[2] * urun[3] for urun in sepet_urunler)
         
-        # 4. Restoranları kontrol et (sepette birden fazla restoran olabilir)
-        restoranlar = {}
-        for urun in sepet_urunler:
-            restoranID = urun[5]
-            if restoranID not in restoranlar:
-                restoranlar[restoranID] = []
-            restoranlar[restoranID].append(urun)
-        
-        # 5. Her restoran için ayrı sipariş oluştur
-        from config import DB_CONFIG
-        import mysql.connector as sql
-        
-        conn = sql.connect(**DB_CONFIG)
+        conn = get_db_connection()
         cursor = conn.cursor()
         
-        siparis_numaralari = []
-        for restoranID, urunler in restoranlar.items():
-            # Sipariş oluştur
-            cursor.execute("INSERT INTO sparis(efendiID, teslimAdres, durum) VALUES (%s, %s, 'Get')", (efendiID, selected_adres))
-            
-            # Son oluşturulan sipariş numarasını al
-            sparisNo = cursor.lastrowid
-            siparis_numaralari.append(sparisNo)
-            
-            # Sipariş ürünlerini kaydet
-            for urun in urunler:
-                yemekID = urun[0]
-                adet = urun[3]
-                cursor.execute("INSERT INTO sparisUrunler(sparisNo, yemekID, adet) VALUES (%s, %s, %s)",(sparisNo, yemekID, adet))
-            
-            # Bu restoran için ürünlerin toplam fiyatını hesapla
-            restoran_toplam = sum(urun[2] * urun[3] for urun in urunler)
-            
-            # Nakit ödeme kaydı oluştur
-            cursor.execute("INSERT INTO nakitOdeme(sparisNo, odemeDate, price) VALUES (%s, CURDATE(), %s)",(sparisNo, restoran_toplam))
-            
-            # En yakın kuryeyi bul ve ata
-            kurye_result = sql_querry("sql/kurye/Enyakinkuryebul.sql", (restoranID,))
-            
-            if kurye_result and len(kurye_result) > 0:
-                kuryeID = kurye_result[0][0]
-                cursor.execute("UPDATE sparis SET kuryeID = %s, durum = 'Cook' WHERE sparisNo = %s",(kuryeID, sparisNo))
+        restoranID = sepet_urunler[0][5]
+        cursor.execute(read_file("sql/SiparisVerme/siparisOlustur.sql"), (efendiID, selected_adres))
+        sparisNo = cursor.lastrowid
+        
+        for urun in sepet_urunler:
+            yemekID = urun[0]
+            adet = urun[3]
+            cursor.execute(read_file("sql/SiparisVerme/siparisUrunEkle.sql"),(sparisNo, yemekID, adet))
+        
+        cursor.execute(read_file("sql/odeme/nakitOdemeEkle.sql"),(sparisNo, toplam_fiyat))
+        
+        tried = []
+        for _ in range(15):
+            placehoder = f" k.id NOT IN ({','.join(tried)}) AND" if tried else ""
+            res = sql_querry(read_file("sql/kurye/Enyakinkuryebul.sql").replace("WHERE","WHERE" + placehoder), (restoranID,))
+            if res and len(res) > 0:
+                kuryeID = res[0][0]
+                # TODO ASK PREMISION tried e ekle
+                cursor.execute("sql/kurye/Kuryeata.sql",(kuryeID, sparisNo))
                 print(f"Sipariş {sparisNo} için kurye {kuryeID} atandı")
+                break
             else:
                 print(f"Sipariş {sparisNo} için müsait kurye bulunamadı")
-        
-        # Commit yap
+                raise
+        else:
+            print(f"Sipariş {sparisNo} için müsait kurye bulunamadı")
+            raise
+        sql_querry("sql/Siparis/Sepetitemizle.sql", (efendiID,))
+
         conn.commit()
         
-        # 6. Sepeti temizle
-        sql_querry("sql/Siparis/Sepetitemizle.sql", (efendiID,))
-        
-        # 7. Başarı mesajı
-        siparis_str = ", ".join(map(str, siparis_numaralari))
-        flash(f"Siparişiniz başarıyla oluşturuldu! Sipariş No: {siparis_str}", "success")
+        flash(f"Siparişiniz başarıyla oluşturuldu! Sipariş No: {sparisNo}", "success")
         flash(f"Toplam tutar: {toplam_fiyat:.2f} ₺", "success")
         
         return redirect("/HomePage")
@@ -543,7 +520,6 @@ def siparis_olustur():
         if conn:
             conn.rollback()
         print(f"Sipariş oluşturma hatası: {e}")
-        import traceback
         traceback.print_exc()
         flash(f"Sipariş oluşturulurken hata oluştu: {e}", "danger")
         return redirect("/sepetim")
@@ -727,4 +703,4 @@ def kuryelogin_post():
 # ============================================
 
 if __name__ == "__main__":
-    app.run("0.0.0.0", 3131, debug=True)
+    app.run("0.0.0.0", 3131)
