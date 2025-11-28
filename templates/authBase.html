@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tekne Ekmeği{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="navbar-left">
+            <a href="/" class="navbar-logo"
+                style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
+                <img src="{{ url_for('static', filename='tekne_logo.png') }}" alt="Tekne Ekmeği Logo" style="height:40px;">
+                <span>Tekne Ekmeği</span>
+            </a>
+        </div>
+
+        <div class="navbar-right">
+            <div class="hamburger" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+
+        <!-- giriş türü menüsü -->
+        <div id="menu" class="dropdown-menu">
+            <a href="/login">Efendi Giriş</a>
+            <a href="/restoranLogin">Restoran Giriş</a>
+            <a href="/kuryeLogin">Kurye Giriş</a>
+        </div>
+    </header>
+
+    <!-- GLOBAL TOAST FLASH MESAJLAR -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="page-container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById("menu");
+            if (menu.style.display === "flex") {
+                menu.style.display = "none";
+            } else {
+                menu.style.display = "flex";
+            }
+        }
+
+        // FLASH MESAJLARI TOAST GİBİ OTOMATİK YOK ET
+        document.addEventListener("DOMContentLoaded", function () {
+            const flashes = document.querySelectorAll(".flash-message");
+
+            flashes.forEach(function (el, index) {
+                // 3 saniye sonra kaybolma animasyonu
+                setTimeout(function () {
+                    el.classList.add("flash-hide");
+                    setTimeout(function () {
+                        if (el && el.parentNode) {
+                            el.parentNode.removeChild(el);
+                        }
+                    }, 400);
+                }, 3000 + index * 300); // birden fazla varsa aralarını aç
+            });
+
+            // Üzerine tıklayınca hemen kapansın
+            flashes.forEach(function (el) {
+                el.addEventListener("click", function () {
+                    el.classList.add("flash-hide");
+                    setTimeout(function () {
+                        if (el && el.parentNode) {
+                            el.parentNode.removeChild(el);
+                        }
+                    }, 400);
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

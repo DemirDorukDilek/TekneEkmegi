@@ -151,10 +151,46 @@ def RestoranHomePage_get():
 # PROFİL VE AYARLAR
 # ============================================
 
-@app.route("/profilim")
+@app.route("/profilim", methods=["GET", "POST"])
 @login_required(TYPES.E)
 def profilim_get():
-    return render_template("Profilim.html")
+    user_id = session["user_id"]
+
+    if request.method == "POST":
+        name = (request.form.get("name") or "").strip()
+        surname = (request.form.get("surname") or "").strip()
+        telno = (request.form.get("telno") or "").strip()
+        email = (request.form.get("email") or "").strip() or None  # email null olabilir
+
+        if not name or not surname or not telno:
+            flash("Ad, soyad ve telefon alanları boş bırakılamaz.", "danger")
+            return redirect("/profilim")
+
+        try:
+            sql_querry(
+                "UPDATE efendi SET name=%s, surname=%s, telno=%s, email=%s WHERE ID=%s",
+                (name, surname, telno, email, user_id)
+            )
+            flash("Profil bilgilerin güncellendi!", "success")
+            return redirect("/profilim")
+
+        except sql.IntegrityError:
+            # telno veya email unique constraint patlarsa
+            flash("Bu telefon numarası veya e-posta zaten başka bir hesapta kayıtlı.", "danger")
+            return redirect("/profilim")
+
+        except sql.Error as err:
+            flash(f"Profil güncellenirken bir hata oluştu: {err}", "danger")
+            return redirect("/profilim")
+
+    # GET isteği: veriyi DB'den çekip formu doldur
+    rows = sql_querry(
+        "SELECT name, surname, telno, email FROM efendi WHERE ID = %s",
+        (user_id,)
+    ) or []
+    user = rows[0] if rows else None  # (name, surname, telno, email)
+
+    return render_template("Profilim.html", user=user)
 
 
 @app.route("/odemeYontemlerim")
@@ -167,7 +203,7 @@ def odeme_yontemlerim_get():
 @login_required(TYPES.E)
 def gecmis_siparislerim_get():
     efendiID = session.get("user_id")
-    siparisler = sql_querry("sql/SiparisVerme/siparislerimListele.sql", (efendiID,)) or []
+    siparisler = sql_querry("sql/SiparisVerme/siparislerimlistele.sql", (efendiID,)) or []
     return render_template("GecmisSiparislerim.html", siparisler=siparisler)
 
 

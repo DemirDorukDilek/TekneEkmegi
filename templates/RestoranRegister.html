@@ -8,13 +8,6 @@
     <p class="subtitle">Tekne Ekmeği üzerinde restoran açmak için kayıt olun.</p>
 
     <form id="Formmmmmmm" action="/post/RestoranRegister" method="post">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="flash-message flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
 
         <div class="form-group">
             <label for="name">Restoran Adı</label>

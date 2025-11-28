@@ -484,3 +484,291 @@ input:focus {
     padding: 6px 10px;
     text-align: center;
 }
+
+/* ============== PROFIL SAYFASI ============== */
+
+.profile-summary {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
+}
+
+.profile-label {
+    font-weight: 500;
+    color: #23304a;
+}
+
+.profile-value {
+    color: #555;
+    text-align: right;
+}
+
+/* ============== EFENDI ANA SAYFA ============== */
+
+.home-card {
+    max-width: 700px;
+}
+
+.restaurant-filter-row {
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.restaurant-search-input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-soft);
+    font-size: 14px;
+    outline: none;
+}
+
+.restaurant-search-input:focus {
+    border-color: var(--primary, #23304a);
+    box-shadow: 0 0 0 2px rgba(35, 48, 74, 0.1);
+}
+
+.current-address {
+    margin-top: 12px;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #faf8f2;
+    border: 1px solid var(--border-soft);
+    font-size: 12px;
+}
+
+.current-address-label {
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: #23304a;
+}
+
+.current-address-value {
+    color: var(--text-muted);
+}
+
+/* ============== PROFIL SAYFASI ============== */
+
+.profile-summary {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding: 6px 0;
+}
+
+.profile-row-input {
+    gap: 10px;
+}
+
+.profile-label {
+    font-weight: 500;
+    color: #23304a;
+    min-width: 90px;
+}
+
+.profile-value {
+    color: #555;
+    text-align: right;
+}
+
+.profile-input {
+    flex: 1;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-soft);
+    font-size: 14px;
+}
+
+.profile-input:focus {
+    outline: none;
+    border-color: var(--primary, #23304a);
+    box-shadow: 0 0 0 2px rgba(35, 48, 74, 0.1);
+}
+
+.profile-form {
+    margin-top: 8px;
+}
+
+/* ============== TOAST / FLASH MESAJLAR ============== */
+
+.flash-container {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.flash-message {
+    min-width: 260px;
+    max-width: 360px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: #fff;
+    background: #23304a;
+    /* default */
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    cursor: pointer;
+}
+
+/* Kapanırken kullanılacak class */
+.flash-hide {
+    opacity: 0;
+    transform: translateX(16px);
+}
+
+/* Kategoriye göre renkler */
+.flash-success {
+    background: #2e7d32;
+}
+
+.flash-danger,
+.flash-error {
+    background: #c62828;
+}
+
+.flash-warning {
+    background: #ed6c02;
+}
+
+.flash-info {
+    background: #1565c0;
+}
+
+/* ============== RESTORAN PANELİ ============== */
+
+.restoran-home-card {
+    max-width: 700px;
+}
+
+.section-title {
+    margin-top: 24px;
+    margin-bottom: 8px;
+    font-size: 18px;
+    color: #d8a451;
+}
+
+.restoran-actions-row {
+    margin-top: 12px;
+    margin-bottom: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.restoran-actions-row form {
+    margin: 0;
+}
+
+.restoran-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.restoran-menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-soft);
+}
+
+.restoran-menu-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.restoran-menu-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e140c;
+}
+
+.restoran-menu-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: #d8a451;
+}
+
+/* ============== RESTORAN PANELİ ============== */
+
+.restoran-home-card {
+    max-width: 700px;
+}
+
+.section-title {
+    margin-top: 24px;
+    margin-bottom: 8px;
+    font-size: 18px;
+    color: #d8a451;
+}
+
+.restoran-actions-row {
+    display: flex;
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+.restoran-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.restoran-menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-soft);
+}
+
+.restoran-menu-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.restoran-menu-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.restoran-menu-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: #d8a451;
+}
+

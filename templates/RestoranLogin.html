@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "authBase.html" %}
 
 {% block title %}Restoran Giriş · Tekne Ekmeği{% endblock %}
 
@@ -8,13 +8,6 @@
     <p class="subtitle">Restoran hesabınıza giriş yapın.</p>
 
     <form action="/post/RestoranLogin" method="post">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="flash-message flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
 
         <div class="form-group">
             <label for="identifier">Telefon Numarası</label>
