@@ -498,12 +498,12 @@ def siparis_olustur():
             if res and len(res) > 0:
                 kuryeID = res[0][0]
                 # TODO ASK PREMISION tried e ekle
-                cursor.execute("sql/kurye/Kuryeata.sql",(kuryeID, sparisNo))
+                cursor.execute(read_file("sql/kurye/Kuryeata.sql"),(kuryeID, sparisNo))
                 print(f"Sipariş {sparisNo} için kurye {kuryeID} atandı")
                 break
             else:
                 print(f"Sipariş {sparisNo} için müsait kurye bulunamadı")
-                raise
+                raise Exception("Kurye bulinamadi")
         else:
             print(f"Sipariş {sparisNo} için müsait kurye bulunamadı")
             raise
@@ -696,6 +696,125 @@ def kuryelogin_post():
             flash(f"Bir hata oluştu: {err}", "danger")
 
         return redirect("/kuryeLogin")
+
+
+# ============================================
+# KURYE YÖNETİMİ
+# ============================================
+
+@app.route("/KuryeHomePage")
+@login_required(TYPES.K)
+def KuryeHomePage_get():
+    kuryeID = session.get("user_id")
+    kurye_bilgileri = sql_querry("sql/kurye/KuryeBilgileriGetir.sql", (kuryeID,))
+    aktif_siparis = sql_querry("sql/kurye/AktifSiparisGetir.sql", (kuryeID,))
+
+    kurye = kurye_bilgileri[0] if kurye_bilgileri else None
+    siparis = aktif_siparis[0] if aktif_siparis else None
+
+    return render_template("KuryeHomePage.html", kurye=kurye, siparis=siparis)
+
+
+@app.route("/kurye/iseBasla", methods=["POST"])
+@login_required(TYPES.K)
+def kurye_ise_basla():
+    kuryeID = session.get("user_id")
+    yeni_durum = request.form.get("durum")
+
+    if yeni_durum not in ["0", "1"]:
+        return {"success": False, "message": "Geçersiz durum"}, 400
+
+    try:
+        sql_querry("sql/kurye/IsWorkingGuncelle.sql", (int(yeni_durum), kuryeID))
+        return {"success": True, "isWorking": int(yeni_durum) == 1}
+    except Exception as e:
+        print(f"İşe başla hatası: {e}")
+        return {"success": False, "message": str(e)}, 500
+
+
+@app.route("/kurye/koordinatGuncelle", methods=["POST"])
+@login_required(TYPES.K)
+def kurye_koordinat_guncelle():
+    kuryeID = session.get("user_id")
+    try:
+        x = float(request.form.get("x"))
+        y = float(request.form.get("y"))
+        sql_querry("sql/kurye/KoordinatGuncelle.sql", (x, y, kuryeID))
+        return {"success": True}
+    except Exception as e:
+        print(f"Koordinat güncelleme hatası: {e}")
+        return {"success": False, "message": str(e)}, 500
+
+
+@app.route("/kurye/aktifSiparis", methods=["GET"])
+@login_required(TYPES.K)
+def kurye_aktif_siparis():
+    kuryeID = session.get("user_id")
+    try:
+        aktif_siparis = sql_querry("sql/kurye/AktifSiparisGetir.sql", (kuryeID,))
+        if aktif_siparis:
+            siparis = aktif_siparis[0]
+            return {
+                "success": True,
+                "siparis": {
+                    "sparisNo": siparis[0],
+                    "durum": siparis[1],
+                    "teslimAdres": siparis[2],
+                    "efendiName": siparis[3],
+                    "efendiSurname": siparis[4],
+                    "efendiTelno": siparis[5],
+                    "il": siparis[6],
+                    "ilce": siparis[7],
+                    "mah": siparis[8],
+                    "cd": siparis[9],
+                    "binano": siparis[10],
+                    "daireno": siparis[11],
+                    "teslimX": siparis[12],
+                    "teslimY": siparis[13],
+                    "restoranName": siparis[14],
+                    "restoranTelno": siparis[15],
+                    "restoranAdres": siparis[16],
+                    "restoranX": siparis[17],
+                    "restoranY": siparis[18]
+                }
+            }
+        return {"success": True, "siparis": None}
+    except Exception as e:
+        print(f"Aktif sipariş getirme hatası: {e}")
+        traceback.print_exc()
+        return {"success": False, "message": str(e)}, 500
+
+
+@app.route("/kurye/siparisOnayla", methods=["POST"])
+@login_required(TYPES.K)
+def kurye_siparis_onayla():
+    kuryeID = session.get("user_id")
+    sparisNo = request.form.get("sparisNo")
+
+    try:
+        sql_querry("sql/kurye/SiparisOnayla.sql", (kuryeID, sparisNo))
+        flash("Sipariş kabul edildi!", "success")
+        return redirect("/KuryeHomePage")
+    except Exception as e:
+        print(f"Sipariş onaylama hatası: {e}")
+        flash(f"Sipariş kabul edilirken hata oluştu: {e}", "danger")
+        return redirect("/KuryeHomePage")
+
+
+@app.route("/kurye/siparisTamamla", methods=["POST"])
+@login_required(TYPES.K)
+def kurye_siparis_tamamla():
+    kuryeID = session.get("user_id")
+    sparisNo = request.form.get("sparisNo")
+
+    try:
+        sql_querry("sql/kurye/SiparisTamamla.sql", (sparisNo, kuryeID))
+        flash("Sipariş teslim edildi!", "success")
+        return redirect("/KuryeHomePage")
+    except Exception as e:
+        print(f"Sipariş tamamlama hatası: {e}")
+        flash(f"Sipariş tamamlanırken hata oluştu: {e}", "danger")
+        return redirect("/KuryeHomePage")
 
 
 # ============================================
