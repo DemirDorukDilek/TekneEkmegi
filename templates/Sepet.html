@@ -71,15 +71,117 @@
         </div>
         {% endfor %}
 
-        <div style="margin-top: 20px; display: flex; gap: 8px;">
-            <form action="/HomePage" method="get" style="flex: 1;">
-                <button type="submit" class="btn btn-secondary">Alışverişe Devam</button>
-            </form>
-            
-            <form action="/siparisOlustur" method="post" style="flex: 1;">
-                <button type="submit" class="btn btn-primary">Sipariş Ver</button>
-            </form>
-        </div>
+        <form action="/siparisOlustur" method="post" style="margin-top: 20px;" id="siparisForm">
+            <div style="margin-bottom: 16px; padding: 16px; background: white; border-radius: 8px; border: 1px solid #dcd6c8;">
+                <label style="display: block; font-weight: 600; color: #23304a; margin-bottom: 12px; font-size: 14px;">
+                    Ödeme Yöntemi:
+                </label>
+                <div style="display: flex; gap: 20px;">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="radio" name="odemeYontemi" value="nakit" checked style="margin-right: 8px; cursor: pointer;" onchange="toggleKartBilgileri()">
+                        <span style="color: #2d2d2d; font-size: 14px;">Nakit</span>
+                    </label>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="radio" name="odemeYontemi" value="krediKarti" style="margin-right: 8px; cursor: pointer;" onchange="toggleKartBilgileri()">
+                        <span style="color: #2d2d2d; font-size: 14px;">Kredi Kartı</span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="kartBilgileri" style="display: none; margin-bottom: 16px; padding: 16px; background: white; border-radius: 8px; border: 1px solid #dcd6c8;">
+                <label style="display: block; font-weight: 600; color: #23304a; margin-bottom: 12px; font-size: 14px;">
+                    Kart Bilgileri:
+                </label>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 4px;">Kart Numarası:</label>
+                    <input type="text" name="kartNo" id="kartNo" placeholder="1234 5678 9012 3456" maxlength="19"
+                           style="width: 100%; padding: 8px 12px; border: 1px solid #dcd6c8; border-radius: 6px; font-size: 14px;">
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 4px;">Kart Sahibi Adı:</label>
+                    <input type="text" name="kartSahibi" id="kartSahibi" placeholder="AD SOYAD"
+                           style="width: 100%; padding: 8px 12px; border: 1px solid #dcd6c8; border-radius: 6px; font-size: 14px; text-transform: uppercase;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 4px;">Son Kullanma Tarihi:</label>
+                        <input type="text" name="sonKullanma" id="sonKullanma" placeholder="AA/YY" maxlength="5"
+                               style="width: 100%; padding: 8px 12px; border: 1px solid #dcd6c8; border-radius: 6px; font-size: 14px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; color: #6b7280; margin-bottom: 4px;">CVV:</label>
+                        <input type="text" name="cvv" id="cvv" placeholder="123" maxlength="3"
+                               style="width: 100%; padding: 8px 12px; border: 1px solid #dcd6c8; border-radius: 6px; font-size: 14px;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <a href="/HomePage" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none; display: inline-block;">
+                    Alışverişe Devam
+                </a>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Sipariş Ver</button>
+            </div>
+        </form>
+
+        <script>
+        function toggleKartBilgileri() {
+            const krediKartiRadio = document.querySelector('input[name="odemeYontemi"][value="krediKarti"]');
+            const kartBilgileriDiv = document.getElementById('kartBilgileri');
+            const kartInputlar = ['kartNo', 'kartSahibi', 'sonKullanma', 'cvv'];
+
+            if (krediKartiRadio.checked) {
+                kartBilgileriDiv.style.display = 'block';
+                // Kredi kartı seçilince alanları zorunlu yap
+                kartInputlar.forEach(id => {
+                    document.getElementById(id).required = true;
+                });
+            } else {
+                kartBilgileriDiv.style.display = 'none';
+                // Nakit seçilince alanları zorunlu olmaktan çıkar ve temizle
+                kartInputlar.forEach(id => {
+                    const input = document.getElementById(id);
+                    input.required = false;
+                    input.value = '';
+                });
+            }
+        }
+
+        // Kart numarası formatla (her 4 hanede bir boşluk)
+        document.addEventListener('DOMContentLoaded', function() {
+            const kartNoInput = document.getElementById('kartNo');
+            if (kartNoInput) {
+                kartNoInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\s/g, '');
+                    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                    e.target.value = formattedValue;
+                });
+            }
+
+            // Son kullanma tarihi formatla (AA/YY)
+            const sonKullanmaInput = document.getElementById('sonKullanma');
+            if (sonKullanmaInput) {
+                sonKullanmaInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                    }
+                    e.target.value = value;
+                });
+            }
+
+            // CVV sadece rakam
+            const cvvInput = document.getElementById('cvv');
+            if (cvvInput) {
+                cvvInput.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                });
+            }
+        });
+        </script>
     {% else %}
         <p style="color: #6b7280; margin-top: 12px; font-size: 14px;">Sepetiniz boş.</p>
         
