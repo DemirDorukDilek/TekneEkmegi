@@ -26,6 +26,11 @@ class TYPES:
     K = "kurye"
 
 
+def banka_islemi_gerceklestir(*args):
+    time.sleep(2)
+    return True
+
+
 def check_session_validity():
     if not session.get("logged_in"):
         return {"valid": False, "reason": "not_logged_in", "message": "Not Logged"}
@@ -516,6 +521,13 @@ def siparis_olustur():
     cursor = None
     try:
         efendiID = session.get("user_id")
+        odeme_yontemi = request.form.get('odemeYontemi')
+        if odeme_yontemi == 'krediKarti':
+            kart_no = request.form.get('kartNo').replace(" ","")
+            kart_sahibi = request.form.get('kartSahibi')
+            son_kullanma = request.form.get('sonKullanma').replace("/","")
+            cvv = request.form.get('cvv')
+
         sepet_urunler = sql_querry("sql/Siparis/Sepetigetir.sql", (efendiID,))
         
         if not sepet_urunler:
@@ -541,7 +553,11 @@ def siparis_olustur():
             adet = urun[3]
             cursor.execute(read_file("sql/SiparisVerme/siparisUrunEkle.sql"),(sparisNo, yemekID, adet))
         
-        cursor.execute(read_file("sql/odeme/nakitOdemeEkle.sql"),(sparisNo, toplam_fiyat))
+        if odeme_yontemi == "krediKarti":
+            if banka_islemi_gerceklestir(cvv, kart_sahibi, kart_no, son_kullanma, toplam_fiyat):
+                cursor.execute(read_file("sql/odeme/kredikarti.sql"),(sparisNo, toplam_fiyat,cvv, kart_sahibi, kart_no, son_kullanma))
+        else:
+            cursor.execute(read_file("sql/odeme/nakitOdemeEkle.sql"),(sparisNo, toplam_fiyat))
         
         tried = []
         for _ in range(15):
