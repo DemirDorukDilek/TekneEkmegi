@@ -89,9 +89,8 @@ CREATE TABLE sepetUrunler(
     CONSTRAINT PK PRIMARY KEY(efendiID,yemekID),
     CONSTRAINT sepetUrunlerFKefendiID FOREIGN KEY(efendiID) REFERENCES efendi(ID),
     CONSTRAINT sepetUrunlerFKyemekID FOREIGN KEY(yemekID) REFERENCES yemek(ID),
-    CONSTRAINT postiveAdet CHECK adet>0
+    CONSTRAINT positiveAdet CHECK (adet > 0)
 );
-
 
 CREATE TABLE sparis(
     sparisNo    INT             NOT NULL AUTO_INCREMENT,
@@ -151,4 +150,3 @@ CREATE TABLE krediKartiOdeme(
     CONSTRAINT krediKartiOdemeFKsparisNo FOREIGN KEY(sparisNo) REFERENCES sparis(sparisNo),
     CONSTRAINT UNQspraisNo UNIQUE (sparisNo)
 );
-
