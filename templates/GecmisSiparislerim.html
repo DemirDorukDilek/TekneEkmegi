@@ -3,13 +3,66 @@
 {% block title %}Geçmiş Siparişlerim · Tekne Ekmeği{% endblock %}
 
 {% block content %}
-<div class="card">
+<div class="card" style="max-width: 700px;">
     <h1>Geçmiş Siparişlerim</h1>
-    <p class="subtitle">Geçmişte verdiğin siparişler burada listelenecek. Şimdilik taslak sayfa.</p>
+    <p class="subtitle">Verdiğin siparişlerin durumunu buradan takip edebilirsin.</p>
 
-    <p style="font-size:13px;">
-        İstersen sonraki adımda buraya sipariş numarası, tarih, toplam tutar ve durum gibi alanlarla
-        gerçek sipariş listesini bağlayabiliriz.
-    </p>
+    {% if siparisler and siparisler|length > 0 %}
+        <div style="margin-top: 20px;">
+            {% for siparis in siparisler %}
+            {# siparis: (sparisNo, durum, teslimAdres, urunler, toplamFiyat, restoranAdi, kuryeAdi) #}
+            <div style="background: #faf8f2; padding: 16px; border-radius: 10px; margin-bottom: 12px; border: 1px solid #dcd6c8;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <div>
+                        <div style="font-weight: 600; font-size: 16px; color: #23304a;">
+                            Sipariş #{{ siparis[0] }}
+                        </div>
+                        <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
+                            {{ siparis[5] }} - {{ siparis[2] }}
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+                        {% if siparis[1] == 'Get' %}background: #fff3cd; color: #856404;
+                        {% elif siparis[1] == 'Cook' %}background: #d1ecf1; color: #0c5460;
+                        {% elif siparis[1] == 'OnWay' %}background: #d4edda; color: #155724;
+                        {% elif siparis[1] == 'Arrived' %}background: #d4edda; color: #155724;
+                        {% endif %}">
+                        {% if siparis[1] == 'Get' %}Hazırlanıyor
+                        {% elif siparis[1] == 'Cook' %}Pişiriliyor
+                        {% elif siparis[1] == 'OnWay' %}Yolda
+                        {% elif siparis[1] == 'Arrived' %}Teslim Edildi
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div style="font-size: 14px; color: #2d2d2d; margin-bottom: 8px;">
+                    {{ siparis[3] }}
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #dcd6c8;">
+                    <div style="font-size: 13px; color: #6b7280;">
+                        {% if siparis[6] %}
+                        Kurye: {{ siparis[6] }}
+                        {% else %}
+                        Kurye atanmadı
+                        {% endif %}
+                    </div>
+                    <div style="font-weight: 700; color: #d8a451; font-size: 16px;">
+                        {{ "%.2f"|format(siparis[4]) }} ₺
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="color: #6b7280; margin-top: 12px; font-size: 14px;">
+            Henüz sipariş vermediniz.
+        </p>
+        
+        <form action="/HomePage" method="get" style="margin-top: 16px;">
+            <button type="submit" class="btn btn-primary">Sipariş Ver</button>
+        </form>
+    {% endif %}
 </div>
 {% endblock %}

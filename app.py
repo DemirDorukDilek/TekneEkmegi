@@ -2,6 +2,7 @@ from datetime import timedelta
 from functools import wraps
 import secrets
 import time
+import traceback
 from flask import Flask, render_template, request, redirect, flash, session,abort
 import mysql.connector as sql
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -165,7 +166,9 @@ def odeme_yontemlerim_get():
 @app.route("/gecmisSiparislerim")
 @login_required(TYPES.E)
 def gecmis_siparislerim_get():
-    return render_template("GecmisSiparislerim.html")
+    efendiID = session.get("user_id")
+    siparisler = sql_querry("sql/SiparisVerme/siparislerimListele.sql", (efendiID,)) or []
+    return render_template("GecmisSiparislerim.html", siparisler=siparisler)
 
 
 @app.route("/kuponlarim")
@@ -473,10 +476,11 @@ def sepetten_sil():
 @app.route("/siparisOlustur", methods=["POST"])
 @login_required(TYPES.E)
 def siparis_olustur():
+    conn = None
+    cursor = None
     try:
         efendiID = session.get("user_id")
-        
-        sepet_urunler = sql_querry("sql/Siparis/sepetiGetir.sql", (efendiID,))
+        sepet_urunler = sql_querry("sql/Siparis/Sepetigetir.sql", (efendiID,))
         
         if not sepet_urunler:
             flash("Sepetiniz boş!", "danger")
@@ -487,14 +491,60 @@ def siparis_olustur():
             flash("Lütfen önce bir teslimat adresi seçin!", "danger")
             return redirect("/adreslerim")
         
-        # TODO: Sipariş oluşturma mantığı
-        flash("Sipariş oluşturma özelliği henüz hazır değil.", "danger")
-        return redirect("/sepetim")
+        toplam_fiyat = sum(urun[2] * urun[3] for urun in sepet_urunler)
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        restoranID = sepet_urunler[0][5]
+        cursor.execute(read_file("sql/SiparisVerme/siparisOlustur.sql"), (efendiID, selected_adres))
+        sparisNo = cursor.lastrowid
+        
+        for urun in sepet_urunler:
+            yemekID = urun[0]
+            adet = urun[3]
+            cursor.execute(read_file("sql/SiparisVerme/siparisUrunEkle.sql"),(sparisNo, yemekID, adet))
+        
+        cursor.execute(read_file("sql/odeme/nakitOdemeEkle.sql"),(sparisNo, toplam_fiyat))
+        
+        tried = []
+        for _ in range(15):
+            placehoder = f" k.id NOT IN ({','.join(tried)}) AND" if tried else ""
+            res = sql_querry(read_file("sql/kurye/Enyakinkuryebul.sql").replace("WHERE","WHERE" + placehoder), (restoranID,))
+            if res and len(res) > 0:
+                kuryeID = res[0][0]
+                # TODO ASK PREMISION tried e ekle
+                cursor.execute(read_file("sql/kurye/Kuryeata.sql"),(kuryeID, sparisNo))
+                print(f"Sipariş {sparisNo} için kurye {kuryeID} atandı")
+                break
+            else:
+                print(f"Sipariş {sparisNo} için müsait kurye bulunamadı")
+                raise Exception("Kurye bulinamadi")
+        else:
+            print(f"Sipariş {sparisNo} için müsait kurye bulunamadı")
+            raise
+        sql_querry("sql/Siparis/Sepetitemizle.sql", (efendiID,))
+
+        conn.commit()
+        
+        flash(f"Siparişiniz başarıyla oluşturuldu! Sipariş No: {sparisNo}", "success")
+        flash(f"Toplam tutar: {toplam_fiyat:.2f} ₺", "success")
+        
+        return redirect("/HomePage")
         
     except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"Sipariş oluşturma hatası: {e}")
+        traceback.print_exc()
         flash(f"Sipariş oluşturulurken hata oluştu: {e}", "danger")
         return redirect("/sepetim")
-
+    
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 # ============================================
 # GİRİŞ VE KAYIT İŞLEMLERİ
@@ -667,6 +717,119 @@ def kuryelogin_post():
 def no403(e):
     flash(f"Unvalid accses due to {e.description["message"]}", "danger")
     return redirect("/")
+@app.route("/KuryeHomePage")
+@login_required(TYPES.K)
+def KuryeHomePage_get():
+    kuryeID = session.get("user_id")
+    kurye_bilgileri = sql_querry("sql/kurye/KuryeBilgileriGetir.sql", (kuryeID,))
+    aktif_siparis = sql_querry("sql/kurye/AktifSiparisGetir.sql", (kuryeID,))
+
+    kurye = kurye_bilgileri[0] if kurye_bilgileri else None
+    siparis = aktif_siparis[0] if aktif_siparis else None
+
+    return render_template("KuryeHomePage.html", kurye=kurye, siparis=siparis)
+
+
+@app.route("/kurye/iseBasla", methods=["POST"])
+@login_required(TYPES.K)
+def kurye_ise_basla():
+    kuryeID = session.get("user_id")
+    yeni_durum = request.form.get("durum")
+
+    if yeni_durum not in ["0", "1"]:
+        return {"success": False, "message": "Geçersiz durum"}, 400
+
+    try:
+        sql_querry("sql/kurye/IsWorkingGuncelle.sql", (int(yeni_durum), kuryeID))
+        return {"success": True, "isWorking": int(yeni_durum) == 1}
+    except Exception as e:
+        print(f"İşe başla hatası: {e}")
+        return {"success": False, "message": str(e)}, 500
+
+
+@app.route("/kurye/koordinatGuncelle", methods=["POST"])
+@login_required(TYPES.K)
+def kurye_koordinat_guncelle():
+    kuryeID = session.get("user_id")
+    try:
+        x = float(request.form.get("x"))
+        y = float(request.form.get("y"))
+        sql_querry("sql/kurye/KoordinatGuncelle.sql", (x, y, kuryeID))
+        return {"success": True}
+    except Exception as e:
+        print(f"Koordinat güncelleme hatası: {e}")
+        return {"success": False, "message": str(e)}, 500
+
+
+@app.route("/kurye/aktifSiparis", methods=["GET"])
+@login_required(TYPES.K)
+def kurye_aktif_siparis():
+    kuryeID = session.get("user_id")
+    try:
+        aktif_siparis = sql_querry("sql/kurye/AktifSiparisGetir.sql", (kuryeID,))
+        if aktif_siparis:
+            siparis = aktif_siparis[0]
+            return {
+                "success": True,
+                "siparis": {
+                    "sparisNo": siparis[0],
+                    "durum": siparis[1],
+                    "teslimAdres": siparis[2],
+                    "efendiName": siparis[3],
+                    "efendiSurname": siparis[4],
+                    "efendiTelno": siparis[5],
+                    "il": siparis[6],
+                    "ilce": siparis[7],
+                    "mah": siparis[8],
+                    "cd": siparis[9],
+                    "binano": siparis[10],
+                    "daireno": siparis[11],
+                    "teslimX": siparis[12],
+                    "teslimY": siparis[13],
+                    "restoranName": siparis[14],
+                    "restoranTelno": siparis[15],
+                    "restoranAdres": siparis[16],
+                    "restoranX": siparis[17],
+                    "restoranY": siparis[18]
+                }
+            }
+        return {"success": True, "siparis": None}
+    except Exception as e:
+        print(f"Aktif sipariş getirme hatası: {e}")
+        traceback.print_exc()
+        return {"success": False, "message": str(e)}, 500
+
+
+@app.route("/kurye/siparisOnayla", methods=["POST"])
+@login_required(TYPES.K)
+def kurye_siparis_onayla():
+    kuryeID = session.get("user_id")
+    sparisNo = request.form.get("sparisNo")
+
+    try:
+        sql_querry("sql/kurye/SiparisOnayla.sql", (kuryeID, sparisNo))
+        flash("Sipariş kabul edildi!", "success")
+        return redirect("/KuryeHomePage")
+    except Exception as e:
+        print(f"Sipariş onaylama hatası: {e}")
+        flash(f"Sipariş kabul edilirken hata oluştu: {e}", "danger")
+        return redirect("/KuryeHomePage")
+
+
+@app.route("/kurye/siparisTamamla", methods=["POST"])
+@login_required(TYPES.K)
+def kurye_siparis_tamamla():
+    kuryeID = session.get("user_id")
+    sparisNo = request.form.get("sparisNo")
+
+    try:
+        sql_querry("sql/kurye/SiparisTamamla.sql", (sparisNo, kuryeID))
+        flash("Sipariş teslim edildi!", "success")
+        return redirect("/KuryeHomePage")
+    except Exception as e:
+        print(f"Sipariş tamamlama hatası: {e}")
+        flash(f"Sipariş tamamlanırken hata oluştu: {e}", "danger")
+        return redirect("/KuryeHomePage")
 
 # ============================================
 # UYGULAMA BAŞLATMA
