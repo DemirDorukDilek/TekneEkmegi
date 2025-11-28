@@ -14,9 +14,7 @@ body {
     padding: 0;
     min-height: 100vh;
     background: #f4f1ea;
-    /* krem arkaplan */
     color: #2d2d2d;
-    /* koyu gri yazı */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     overflow-x: hidden;
 }
@@ -24,18 +22,14 @@ body {
 /* Renk paleti */
 :root {
     --accent: #d8a451;
-    /* altın sarısı */
     --accent-dark: #b68637;
     --accent-light: #f6dfb8;
 
     --button: #23304a;
-    /* lacivert */
     --button-hover: #2f3f63;
 
     --card-bg: #ffffff;
-    /* beyaz kart */
     --input-bg: #faf8f2;
-    /* krem input arka plan */
     --border-soft: #dcd6c8;
     --text-muted: #6b7280;
 }
@@ -51,18 +45,19 @@ body {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-
     color: var(--accent-light);
-
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     border-bottom: 2px solid rgba(0, 0, 0, 0.25);
     position: relative;
-
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
-    /* okunabilirlik */
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .navbar-logo {
@@ -72,6 +67,94 @@ body {
     font-size: 22px;
     font-weight: 700;
     color: #fffaf1;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ---------- ADRES SEÇİMİ ---------- */
+
+.navbar-address-container {
+    position: relative;
+}
+
+.navbar-address {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    background: rgba(0, 0, 0, 0.25);
+    color: #fffaf1;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-address:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.address-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30, 30, 30, 0.9);
+    backdrop-filter: blur(4px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 6px;
+    min-width: 160px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 25;
+}
+
+.address-dropdown-item {
+    margin: 0;
+}
+
+.address-dropdown-item button {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: #fffaf1;
+    padding: 6px 10px;
+    text-align: center;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.address-dropdown-item button:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.address-dropdown-empty {
+    font-size: 12px;
+    color: #ddd;
+    padding: 6px 10px;
+    text-align: center;
+}
+
+.address-dropdown-add {
+    display: block;
+    margin-top: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    text-align: center;
+    color: #ffeec0;
+    text-decoration: none;
+    border-radius: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.address-dropdown-add:hover {
+    background: rgba(255, 255, 255, 0.12);
 }
 
 /* ---------- HAMBURGER MENÜ ---------- */
@@ -92,9 +175,10 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
-/* --------------- CART İKONU --------------- */
+/* ---------- CART & PROFILE İKONU ---------- */
 
-.cart-icon {
+.cart-icon,
+.profile-icon {
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -104,16 +188,19 @@ body {
     color: #fff2d8;
     font-size: 18px;
     cursor: pointer;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     box-shadow: 0 1px 3px rgba(0, 0, 0, .45);
 }
 
-.cart-icon:hover {
+.cart-icon:hover,
+.profile-icon:hover {
     background: rgba(255, 255, 255, 0.15);
+}
+
+.profile-icon {
+    font-size: 16px;
 }
 
 /* ---------- DROPDOWN MENÜLER ---------- */
@@ -122,13 +209,10 @@ body {
     position: absolute;
     top: 58px;
     right: 20px;
-
     background: rgba(30, 30, 30, 0.85);
     backdrop-filter: blur(4px);
-
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 10px;
-
     padding: 10px;
     display: none;
     flex-direction: column;
@@ -151,38 +235,6 @@ body {
 
 .profile-menu {
     right: 60px;
-}
-
-/* ---------- NAVBAR SAĞ TARAF / PROFİL ---------- */
-
-.navbar-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.profile-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid #fff2d8;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 16px;
-    color: #fff2d8;
-    cursor: pointer;
-
-    background: rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(2px);
-
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-}
-
-.profile-icon:hover {
-    background: rgba(255, 255, 255, 0.15);
 }
 
 /* =========================================================
@@ -219,6 +271,10 @@ body {
     margin-bottom: 18px;
     font-size: 14px;
     color: var(--text-muted);
+}
+
+.home-card {
+    max-width: 700px;
 }
 
 /* ---------- FORM ELEMANLARI ---------- */
@@ -340,30 +396,217 @@ input:focus {
 }
 
 /* =========================================================
-   FLASH MESAJLARI
+   ANA SAYFA
    ========================================================= */
 
-.flash-message {
+.restaurant-filter-row {
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.restaurant-search-input {
     width: 100%;
     padding: 8px 10px;
     border-radius: 8px;
-    margin-bottom: 10px;
-    font-size: 13px;
+    border: 1px solid var(--border-soft);
+    font-size: 14px;
+    outline: none;
+}
+
+.restaurant-search-input:focus {
+    border-color: var(--button);
+    box-shadow: 0 0 0 2px rgba(35, 48, 74, 0.1);
+}
+
+.current-address {
+    margin-top: 12px;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #faf8f2;
+    border: 1px solid var(--border-soft);
+    font-size: 12px;
+}
+
+.current-address-label {
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: #23304a;
+}
+
+.current-address-value {
+    color: var(--text-muted);
+}
+
+/* =========================================================
+   PROFIL SAYFASI
+   ========================================================= */
+
+.profile-summary {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding: 6px 0;
+}
+
+.profile-row-input {
+    gap: 10px;
+}
+
+.profile-label {
+    font-weight: 500;
+    color: #23304a;
+    min-width: 90px;
+}
+
+.profile-value {
+    color: #555;
+    text-align: right;
+}
+
+.profile-input {
+    flex: 1;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-soft);
+    font-size: 14px;
+}
+
+.profile-input:focus {
+    outline: none;
+    border-color: var(--button);
+    box-shadow: 0 0 0 2px rgba(35, 48, 74, 0.1);
+}
+
+.profile-form {
+    margin-top: 8px;
+}
+
+/* =========================================================
+   TOAST / FLASH MESAJLAR
+   ========================================================= */
+
+.flash-container {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.flash-message {
+    min-width: 260px;
+    max-width: 360px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: #fff;
+    background: #23304a;
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    cursor: pointer;
+}
+
+.flash-hide {
+    opacity: 0;
+    transform: translateX(16px);
 }
 
 .flash-success {
-    background: #e5ffe5;
-    color: #0f6f29;
-    border: 1px solid #30a44b;
+    background: #2e7d32;
 }
 
-.flash-danger {
-    background: #ffe5e5;
-    color: #972525;
-    border: 1px solid #e34d4d;
+.flash-danger,
+.flash-error {
+    background: #c62828;
 }
 
-/* ---------- RESPONSIVE ---------- */
+.flash-warning {
+    background: #ed6c02;
+}
+
+.flash-info {
+    background: #1565c0;
+}
+
+/* =========================================================
+   RESTORAN PANELİ
+   ========================================================= */
+
+.restoran-home-card {
+    max-width: 700px;
+}
+
+.section-title {
+    margin-top: 24px;
+    margin-bottom: 8px;
+    font-size: 18px;
+    color: #d8a451;
+}
+
+.restoran-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+.restoran-actions-row form {
+    margin: 0;
+}
+
+.restoran-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.restoran-menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-soft);
+}
+
+.restoran-menu-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.restoran-menu-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e140c;
+}
+
+.restoran-menu-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: #d8a451;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
 @media (max-width: 480px) {
     .page-container {
@@ -377,110 +620,4 @@ input:focus {
     .navbar-logo {
         font-size: 20px;
     }
-}
-
-.navbar-address {
-    margin-left: 12px;
-    font-size: 15px;
-    font-weight: 600;
-    color: #fffaf1;
-    cursor: pointer;
-    padding: 6px 10px;
-    border-radius: 8px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
-}
-
-.navbar-address:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.navbar-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-/* Adres seç butonu */
-.navbar-address-container {
-    position: relative;
-}
-
-.navbar-address {
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    background: rgba(0, 0, 0, 0.25);
-    color: #fffaf1;
-    font-size: 14px;
-    cursor: pointer;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-.navbar-address:hover {
-    background: rgba(255, 255, 255, 0.18);
-}
-
-/* Adres seç dropdown'u – butonun hemen altında ortalanmış */
-.address-dropdown {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 50%;
-    transform: translateX(-50%);
-
-    background: rgba(30, 30, 30, 0.9);
-    backdrop-filter: blur(4px);
-
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-
-    padding: 6px;
-    min-width: 160px;
-
-    display: none;
-    flex-direction: column;
-    gap: 4px;
-    z-index: 25;
-}
-
-.address-dropdown-add {
-    display: block;
-    margin-top: 4px;
-    padding: 6px 10px;
-    font-size: 13px;
-    text-align: center;
-    color: #ffeec0;
-    text-decoration: none;
-    border-radius: 6px;
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-.address-dropdown-add:hover {
-    background: rgba(255, 255, 255, 0.12);
-}
-
-.address-dropdown-item {
-    margin: 0;
-}
-
-.address-dropdown-item button {
-    width: 100%;
-    border: none;
-    background: transparent;
-    color: #fffaf1;
-    padding: 6px 10px;
-    text-align: center;
-    font-size: 13px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.address-dropdown-item button:hover {
-    background: rgba(255, 255, 255, 0.12);
-}
-
-.address-dropdown-empty {
-    font-size: 12px;
-    color: #ddd;
-    padding: 6px 10px;
-    text-align: center;
 }

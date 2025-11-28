@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Restoran Paneli · Tekne Ekmeği{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header class="navbar restoran-navbar">
+        <div class="navbar-left">
+            <a href="/" class="navbar-logo"
+                style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
+                <img src="{{ url_for('static', filename='tekne_logo.png') }}" alt="Tekne Ekmeği Logo" style="height:40px;">
+                <span>Tekne Ekmeği</span>
+            </a>
+        </div>
+
+        <div class="navbar-right">
+            <button type="button" class="profile-icon" onclick="toggleProfileMenu()">
+                👤
+            </button>
+        </div>
+    </header>
+
+    <!-- PROFIL MENÜSÜ -->
+    <div id="profile-menu" class="dropdown-menu profile-menu">
+        <a href="/RestoranHomePage">Ana Panel</a>
+        <a href="/addYemek">Yeni Yemek Ekle</a>
+        <a href="/logout">Çıkış yap</a>
+    </div>
+
+    <!-- FLASH TOAST -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="page-container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        function toggleProfileMenu() {
+            const menu = document.getElementById("profile-menu");
+            if (menu.style.display === "flex") menu.style.display = "none";
+            else menu.style.display = "flex";
+        }
+
+        // Menü dışına tıklayınca kapansın
+        document.addEventListener('click', function (e) {
+            const menu = document.getElementById("profile-menu");
+            const icon = document.querySelector(".profile-icon");
+
+            if (!menu.contains(e.target) && !icon.contains(e.target)) {
+                menu.style.display = "none";
+            }
+        });
+
+        // Flash otomatik yok etme
+        document.addEventListener("DOMContentLoaded", function () {
+            const flashes = document.querySelectorAll(".flash-message");
+            flashes.forEach((el, i) => {
+                setTimeout(() => {
+                    el.classList.add("flash-hide");
+                    setTimeout(() => el.remove(), 400);
+                }, 3000 + i * 300);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

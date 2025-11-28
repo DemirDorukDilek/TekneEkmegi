@@ -4,51 +4,42 @@
 
 {% block content %}
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-{% for category, message in messages %}
-<div class="flash-message flash-{{ category }}">{{ message }}</div>
-{% endfor %}
-{% endif %}
-{% endwith %}
-
-<div class="card" style="max-width: 600px;">
+<div class="card home-card">
     <h1>Yakındaki Restoranlar</h1>
-    <p class="subtitle">En yakın restoranları listele ve sipariş ver.</p>
-    <input type="text" id="filitre" name="filitre" value="">
+    <p class="subtitle">Adresine en yakın restoranları listele ve sipariş ver.</p>
+
+    <div class="restaurant-filter-row">
+        <input type="text" id="filitre" name="filitre" class="restaurant-search-input"
+            placeholder="Restoran adıyla filtrele...">
+    </div>
+
     <div id="restaurant-list-wrapper">
         {% include "partials/restoran_list.html" %}
     </div>
-
 </div>
-
 
 <script>
     let filitreTimer = null;
+    const filitreInput = document.getElementById('filitre');
 
-    document.getElementById('filitre').addEventListener('input', function (e) {
+    filitreInput.addEventListener('input', function (e) {
         const value = e.target.value;
 
-        // Önceki timer’ı iptal et
         clearTimeout(filitreTimer);
 
-        // 400 ms boyunca yeni tuş gelmezse isteği at
         filitreTimer = setTimeout(function () {
             fetch('/restoranFiltre', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({ filitre: value })
             })
-            .then(function (res) { return res.text(); })
-            .then(function (html) {
-                // Sadece liste kısmını yeniliyoruz
-                document.getElementById('restaurant-list-wrapper').innerHTML = html;
-            })
-            .catch(function (err) {
-                console.error('Hata:', err);
-            });
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('restaurant-list-wrapper').innerHTML = html;
+                });
         }, 400);
     });
 </script>

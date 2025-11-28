@@ -7,14 +7,6 @@
     <h1>{{ restoran[1] }}</h1>
     <p class="subtitle">Minimum sepet tutarı: {{ "%.2f"|format(restoran[4]) }} ₺</p>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="flash-message flash-{{ category }}">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-
     <h2 style="margin-top: 24px; color: #d8a451; font-size: 18px;">Menü</h2>
     
     {% if yemekler and yemekler|length > 0 %}

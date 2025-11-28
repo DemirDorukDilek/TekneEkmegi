@@ -12,15 +12,17 @@
 
     <header class="navbar">
         <div class="navbar-left">
-            <a href="/" class="navbar-logo" style="text-decoration:none; color:inherit;">
-                Tekne Ekmeği
+            <a href="/" class="navbar-logo"
+                style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
+                <img src="{{ url_for('static', filename='tekne_logo.png') }}" alt="Tekne Ekmeği Logo" style="height:40px;">
+                <span>Tekne Ekmeği</span>
             </a>
-    
+
             <div class="navbar-address-container">
                 <button type="button" class="navbar-address" onclick="toggleAddressMenu()">
                     {{ navbar_selected_adresName or "Adres seç" }}
                 </button>
-            
+
                 <div id="address-menu" class="address-dropdown">
                     {% if navbar_adresler %}
                     {% for a in navbar_adresler %}
@@ -37,7 +39,7 @@
                         Kayıtlı adres yok
                     </div>
                     {% endif %}
-            
+
                     <!-- + Yeni adres ekle -->
                     <a href="/addAdress" class="address-dropdown-add">
                         ➕ Yeni adres ekle
@@ -45,30 +47,30 @@
                 </div>
             </div>
         </div>
-    
+
         <div class="navbar-right">
             <button class="cart-icon" onclick="window.location.href='/sepetim'">
                 🛒
             </button>
-    
+
             <button type="button" class="profile-icon" onclick="toggleProfileMenu()" title="Profil">
                 👤
             </button>
-    
+
             <div class="hamburger" onclick="toggleMenu()">
                 <div></div>
                 <div></div>
                 <div></div>
             </div>
         </div>
-    
+
         <!-- giriş türü menüsü -->
         <div id="menu" class="dropdown-menu">
             <a href="/login">Efendi Giriş</a>
             <a href="/restoranLogin">Restoran Giriş</a>
             <a href="/kuryeLogin">Kurye Giriş</a>
         </div>
-    
+
         <!-- profil menüsü -->
         <div id="profile-menu" class="dropdown-menu profile-menu">
             <a href="/profilim">Profilim</a>
@@ -80,6 +82,19 @@
             <a href="/logout">Çıkış yap</a>
         </div>
     </header>
+
+    <!-- GLOBAL TOAST FLASH MESAJLAR -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
 
     <main class="page-container">
         {% block content %}{% endblock %}
@@ -130,6 +145,35 @@
                 addressMenu.style.display = "flex";
             }
         }
+
+        // FLASH MESAJLARI TOAST GİBİ OTOMATİK YOK ET
+        document.addEventListener("DOMContentLoaded", function () {
+            const flashes = document.querySelectorAll(".flash-message");
+
+            flashes.forEach(function (el, index) {
+                // 3 saniye sonra kaybolma animasyonu
+                setTimeout(function () {
+                    el.classList.add("flash-hide");
+                    setTimeout(function () {
+                        if (el && el.parentNode) {
+                            el.parentNode.removeChild(el);
+                        }
+                    }, 400);
+                }, 3000 + index * 300); // birden fazla varsa aralarını aç
+            });
+
+            // Üzerine tıklayınca hemen kapansın
+            flashes.forEach(function (el) {
+                el.addEventListener("click", function () {
+                    el.classList.add("flash-hide");
+                    setTimeout(function () {
+                        if (el && el.parentNode) {
+                            el.parentNode.removeChild(el);
+                        }
+                    }, 400);
+                });
+            });
+        });
     </script>
 
 </body>

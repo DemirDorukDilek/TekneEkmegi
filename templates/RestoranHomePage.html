@@ -1,31 +1,40 @@
-{% extends "base.html" %}
+{% extends "restoranBase.html" %}
 
-{% block title %}Restoran Ana Sayfa · Tekne Ekmeği{% endblock %}
+{% block title %}Restoran Paneli · Tekne Ekmeği{% endblock %}
 
 {% block content %}
-<div class="card">
+<div class="card restoran-home-card">
     <h1>Restoran Paneli</h1>
-    <p class="subtitle">Menünü ve siparişlerini buradan yönet.</p>
+    <p class="subtitle">
+        Menünü görüntüleyebilir ve yeni ürün ekleyebilirsin.
+    </p>
 
-    <form action="/addYemek" method="get">
-        <button type="submit" class="btn btn-primary">Yeni Yemek Ekle</button>
-    </form>
+    <div class="restoran-actions-row">
+        <a href="/addYemek" class="btn btn-primary">+ Yeni Yemek Ekle</a>
+    </div>
 
-    <h2 style="margin-top: 24px; color: #d8a451; font-size: 18px;">Mevcut Yemekler</h2>
-    
+    <h2 class="section-title">Mevcut Yemekler</h2>
+
     {% if yemekler and yemekler|length > 0 %}
-        <div style="margin-top: 12px;">
-            {% for yemek in yemekler %}
-            <div style="background: #1e140c; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #d8a451;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 500;">{{ yemek[1] }}</span>
-                    <span style="color: #d8a451; font-weight: 600;">{{ "%.2f"|format(yemek[2]) }} ₺</span>
-                </div>
+    <div class="restoran-menu-list">
+        {% for yemek in yemekler %}
+        <div class="restoran-menu-item">
+            <div class="restoran-menu-info">
+                <div class="restoran-menu-name">{{ yemek[1] }}</div>
+                <div class="restoran-menu-price">{{ "%.2f"|format(yemek[2]) }} ₺</div>
             </div>
-            {% endfor %}
+
+            <div class="restoran-menu-actions">
+                <!-- ileride eklenecek -->
+                <!-- <button class="btn btn-secondary btn-sm">Düzenle</button> -->
+                <!-- <button class="btn btn-secondary btn-sm">Sil</button> -->
+            </div>
         </div>
+        {% endfor %}
+    </div>
     {% else %}
-        <p style="color: #bfa78a; margin-top: 12px; font-size: 14px;">Henüz yemek eklenmemiş.</p>
+    <p class="subtitle">Henüz menü eklenmemiş.</p>
     {% endif %}
+
 </div>
 {% endblock %}
