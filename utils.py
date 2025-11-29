@@ -14,10 +14,22 @@ def read_file(fp):
 
 
 def make_db():
+    make_table()
+    make_index()
+
+def make_table():
     conn = get_db_connection()
     cursor = conn.cursor()
     for l in read_file("sql/CreateTable.sql").split(";"):
         if len(l.strip()) > 0:
+            cursor.execute(l.strip()+";")
+    conn.commit()
+
+def make_index():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    for l in read_file("sql/AddIndex.sql").split(";"):
+        if len(l.strip()) > 0 and l.startswith("CREATE INDEX"):
             cursor.execute(l.strip()+";")
     conn.commit()
 
