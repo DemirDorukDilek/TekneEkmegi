@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS yemek;
 DROP TABLE IF EXISTS kurye;
 DROP TABLE IF EXISTS restoran;
 DROP TABLE IF EXISTS efendi;
+DROP TABLE IF EXISTS kredikarti;
 
 
 CREATE TABLE efendi(
@@ -118,7 +119,6 @@ CREATE TABLE sparisUrunler(
 
 CREATE TABLE nakitOdeme(
     sparisNo                INT         NOT NULL,
-    odemeNo                 INT         NOT NULL AUTO_INCREMENT,
     odemeDate               DATE        NOT NULL,
     price                   FLOAT       NOT NULL CHECK (price >= 0),
     EfendiOdedi             BOOLEAN     DEFAULT false, -- Musteriden para alindi
@@ -126,14 +126,21 @@ CREATE TABLE nakitOdeme(
     KuryeUcretiOdendi       BOOLEAN     DEFAULT false, -- kuryeye parasi ondendi
     RestoranUcretiOdendi    BOOLEAN     DEFAULT false, -- restorana parasi odendi
 
-    CONSTRAINT PK PRIMARY KEY(odemeNo),
+    CONSTRAINT PK PRIMARY KEY(sparisNo),
     CONSTRAINT nakitOdemeFKsparisNo FOREIGN KEY(sparisNo) REFERENCES sparis(sparisNo),
     CONSTRAINT UNQspraisNo UNIQUE (sparisNo)
+);
+create TABLE kredikarti(
+    Kartno                  VARCHAR(16)           NOT NULL,
+    cvv                     INT(3)            NOT NULL,
+    kartSahibiAdi           VARCHAR(60)       NOT NULL,
+    dueDate                 VARCHAR(4)              NOT NULL,
+
+    CONSTRAINT PK PRIMARY KEY(Kartno)
 );
 
 CREATE TABLE krediKartiOdeme(
     sparisNo                INT         NOT NULL,
-    odemeNo                 INT         NOT NULL AUTO_INCREMENT,
     odemeDate               DATE        NOT NULL,
     price                   FLOAT       NOT NULL CHECK (price >= 0),
     EfendiOdedi             BOOLEAN     DEFAULT false,
@@ -141,12 +148,10 @@ CREATE TABLE krediKartiOdeme(
     KuryeUcretiOdendi       BOOLEAN     DEFAULT false,
     RestoranUcretiOdendi    BOOLEAN     DEFAULT false,
 
-    cvv                     INT(3)            NOT NULL,
-    kartSahibiAdi           VARCHAR(60)       NOT NULL,
-    Kartno                  INT(16)           NOT NULL,
-    dueDate                 DATE              NOT NULL,
+    Kartno                  VARCHAR(16)           NOT NULL,
 
-    CONSTRAINT PK PRIMARY KEY(odemeNo),
+    CONSTRAINT PK PRIMARY KEY(sparisNo),
     CONSTRAINT krediKartiOdemeFKsparisNo FOREIGN KEY(sparisNo) REFERENCES sparis(sparisNo),
+    CONSTRAINT krediKartiFK FOREIGN KEY(Kartno) REFERENCES kredikarti(Kartno),
     CONSTRAINT UNQspraisNo UNIQUE (sparisNo)
 );

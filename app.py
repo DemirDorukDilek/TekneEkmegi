@@ -467,10 +467,21 @@ def sepete_ekle():
     print(f"  restoranID: {restoranID}, type: {type(restoranID)}")
     
     try:
-        result = sql_querry("sql/Siparis/sepeteEkle.sql", (efendiID, yemekID, adet, adet))
-        print(f"DEBUG - SQL result: {result}")
+        if adet < 0:
+            # Mevcut adeti kontrol et
+            mevcut = sql_querry("SELECT adet FROM sepetUrunler WHERE efendiID = %s AND yemekID = %s", (efendiID, yemekID))
+            if mevcut[0][0] + adet <= 0:
+                sql_querry("DELETE FROM sepetUrunler WHERE efendiID = %s AND yemekID = %s", (efendiID, yemekID))
+                flash("Ürün sepetten tamamen kaldırıldı!", "success")
+                if (restoranID == "sepet"):
+                    return redirect("/sepetim")
+                return redirect(f"/restoranSec?restoranID={restoranID}")
+            sql_querry("UPDATE sepetUrunler SET adet=%s WHERE efendiID = %s AND yemekID = %s", (mevcut[0][0] - 1, efendiID, yemekID))
+        else:
+            result = sql_querry("sql/Siparis/sepeteEkle.sql", (efendiID, yemekID, adet, adet))
+            print(f"DEBUG - SQL result: {result}")
         if adet<0:
-            flash(f"{-adet} adet ürün sepetten silindi!", "success")
+            flash(f"{-adet} adet ürün sepetten azaltıldı!", "success")
         else:
             flash(f"{adet} adet ürün sepete eklendi!", "success")
         print("DEBUG - Flash mesajı başarılı eklendi")
@@ -527,6 +538,7 @@ def siparis_olustur():
             kart_sahibi = request.form.get('kartSahibi')
             son_kullanma = request.form.get('sonKullanma').replace("/","")
             cvv = request.form.get('cvv')
+            exist = sql_querry("SELECT kartno from krediKarti where kartno=%s",(kart_no,))
 
         sepet_urunler = sql_querry("sql/Siparis/Sepetigetir.sql", (efendiID,))
         
@@ -555,7 +567,9 @@ def siparis_olustur():
         
         if odeme_yontemi == "krediKarti":
             if banka_islemi_gerceklestir(cvv, kart_sahibi, kart_no, son_kullanma, toplam_fiyat):
-                cursor.execute(read_file("sql/odeme/kredikarti.sql"),(sparisNo, toplam_fiyat,cvv, kart_sahibi, kart_no, son_kullanma))
+                if not exist:
+                    cursor.execute(read_file("sql/odeme/kartolusturma.sql"),(kart_no, cvv, kart_sahibi, son_kullanma))
+                cursor.execute(read_file("sql/odeme/kredikarti.sql"),(sparisNo, toplam_fiyat, kart_no))
         else:
             cursor.execute(read_file("sql/odeme/nakitOdemeEkle.sql"),(sparisNo, toplam_fiyat))
         
