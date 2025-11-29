@@ -43,7 +43,8 @@
 
                 <div class="info-section">
                     <h4>📍 Teslimat Adresi</h4>
-                    <p>{{ siparis[11] }} Mah., {{ siparis[12] }} Cad., No: {{ siparis[13] }}, Daire: {{ siparis[14] }}</p>
+                    <p>{{ siparis[11] }} Mah., {{ siparis[12] }} Cad., No: {{ siparis[13] }}, Daire: {{ siparis[14] }}
+                    </p>
                     <p>{{ siparis[10] }}, {{ siparis[9] }}</p>
                 </div>
 
@@ -56,7 +57,7 @@
                 {% else %}
                 <div class="info-section kurye-bekleniyor">
                     <h4>🏍️ Kurye Bilgileri</h4>
-                    <p style="color: #ff9800; font-style: italic;">Kurye ataması bekleniyor...</p>
+                    <p class="kurye-bekleniyor-text">Kurye ataması bekleniyor...</p>
                 </div>
                 {% endif %}
 
@@ -84,8 +85,12 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3" style="text-align: right;"><strong>Toplam:</strong></td>
-                                <td><strong>{{ "%.2f"|format(detaylar|sum(attribute=3)) }} ₺</strong></td>
+                                <td colspan="3" class="siparis-detay-toplam-label">
+                                    <strong>Toplam:</strong>
+                                </td>
+                                <td class="siparis-detay-toplam-value">
+                                    <strong>{{ "%.2f"|format(detaylar|sum(attribute=3)) }} ₺</strong>
+                                </td>
                             </tr>
                         </tfoot>
                     </table>
@@ -96,127 +101,7 @@
         {% endfor %}
     </div>
     {% else %}
-    <p class="subtitle" style="text-align: center; margin-top: 24px;">Henüz aktif sipariş yok.</p>
+    <p class="siparis-empty-text">Henüz aktif sipariş yok.</p>
     {% endif %}
 </div>
-
-<style>
-.siparis-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 16px;
-}
-
-.siparis-card {
-    background: #1e140c;
-    border: 2px solid #d8a451;
-    border-radius: 12px;
-    padding: 16px;
-}
-
-.siparis-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #d8a451;
-}
-
-.siparis-no {
-    color: #d8a451;
-    font-size: 20px;
-    margin: 0 0 8px 0;
-}
-
-.siparis-durum {
-    display: inline-block;
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.siparis-durum-get {
-    background: #ff9800;
-    color: #000;
-}
-
-.siparis-durum-cook {
-    background: #2196f3;
-    color: #fff;
-}
-
-.siparis-durum-onway {
-    background: #4ade80;
-    color: #000;
-}
-
-.siparis-info {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.info-section {
-    background: #2d1f0f;
-    padding: 12px;
-    border-radius: 8px;
-}
-
-.info-section h4 {
-    color: #d8a451;
-    font-size: 14px;
-    margin: 0 0 8px 0;
-}
-
-.info-section p {
-    color: #bfa78a;
-    font-size: 13px;
-    margin: 4px 0;
-}
-
-.kurye-bekleniyor {
-    border: 2px dashed #ff9800;
-}
-
-.siparis-detay-tablo {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8px;
-}
-
-.siparis-detay-tablo th,
-.siparis-detay-tablo td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #3d2f1f;
-    color: #bfa78a;
-    font-size: 13px;
-}
-
-.siparis-detay-tablo th {
-    color: #d8a451;
-    font-weight: 600;
-}
-
-.siparis-detay-tablo tfoot td {
-    border-bottom: none;
-    padding-top: 12px;
-    color: #d8a451;
-}
-
-.restoran-actions-row {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
-}
-
-.section-title {
-    color: #d8a451;
-    font-size: 18px;
-    margin: 24px 0 16px 0;
-}
-</style>
 {% endblock %}

@@ -1,0 +1,35 @@
+{% extends "restoranBase.html" %}
+
+{% block title %}Restoran Profil · Tekne Ekmeği{% endblock %}
+
+{% block content %}
+<div class="card restoran-home-card">
+    <h1>Restoran Profil Bilgileri</h1>
+    <p class="subtitle">Restoran bilgilerini buradan güncelleyebilirsin.</p>
+
+    <form action="/restoranProfil" method="post" class="profile-form">
+
+        <div class="form-group">
+            <label>Restoran Adı</label>
+            <input type="text" name="name" value="{{ restoran[1] }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Telefon Numarası</label>
+            <input type="text" name="telno" value="{{ restoran[2] }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Adres</label>
+            <input type="text" name="adress" value="{{ restoran[3] }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Minimum Sepet Tutarı</label>
+            <input type="number" step="0.01" name="Minsepet" value="{{ restoran[4] }}" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+    </form>
+</div>
+{% endblock %}

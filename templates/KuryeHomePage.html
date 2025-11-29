@@ -1,58 +1,61 @@
-{% extends "base.html" %}
+{% extends "kuryeBase.html" %}
 
 {% block title %}Kurye Paneli · Tekne Ekmeği{% endblock %}
 
 {% block content %}
-<div class="card">
+<div class="card courier-card">
     <h1>Kurye Paneli</h1>
     <p class="subtitle">Hoş geldin, {{ kurye[1] if kurye else 'Kurye' }}!</p>
 
     {% if kurye %}
-    <div style="background: #1e140c; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-        <h3 style="color: #d8a451; font-size: 16px; margin-bottom: 8px;">Kurye Bilgileri</h3>
-        <p style="margin: 4px 0;"><strong>Ad Soyad:</strong> {{ kurye[1] }} {{ kurye[2] }}</p>
-        <p style="margin: 4px 0;"><strong>Telefon:</strong> {{ kurye[3] }}</p>
-        <p style="margin: 4px 0;" id="durum-text">
+    <!-- KURYE BİLGİLERİ KARTI -->
+    <section class="courier-info-panel">
+        <h3 class="courier-section-title">Kurye Bilgileri</h3>
+        <p class="courier-info-row"><strong>Ad Soyad:</strong> {{ kurye[1] }} {{ kurye[2] }}</p>
+        <p class="courier-info-row"><strong>Telefon:</strong> {{ kurye[3] }}</p>
+        <p class="courier-info-row" id="durum-text">
             <strong>Durum:</strong>
-            <span id="durum-badge" class="badge" style="padding: 4px 12px; border-radius: 4px; font-weight: 600;">
+            <span id="durum-badge" class="badge {% if kurye[5] %}badge-working{% else %}badge-idle{% endif %}">
                 {% if kurye[5] %}Çalışıyor{% else %}Çalışmıyor{% endif %}
             </span>
         </p>
-        <p style="margin: 4px 0; font-size: 12px; color: #bfa78a;" id="konum-text">Konum alınıyor...</p>
-    </div>
+        <p class="courier-location-text" id="konum-text">
+            Konum alınıyor...
+        </p>
+    </section>
 
-    <button
-        id="ise-basla-btn"
-        class="btn btn-primary"
-        onclick="toggleCalisma()"
-        data-working="{{ '1' if kurye[5] else '0' }}"
-        style="width: 100%; font-size: 16px; padding: 12px;">
+    <!-- ÇALIŞMA DURUMU BUTONU -->
+    <button id="ise-basla-btn" class="btn btn-primary courier-toggle-btn" onclick="toggleCalisma()"
+        data-working="{{ '1' if kurye[5] else '0' }}">
         {% if kurye[5] %}İşi Bitir{% else %}İşe Başla{% endif %}
     </button>
 
     {% if siparis %}
-    <div style="background: #0f2816; padding: 16px; border-radius: 8px; margin-top: 24px; border: 2px solid #4ade80;">
-        <h2 style="color: #4ade80; font-size: 18px; margin-bottom: 12px;">Aktif Sipariş</h2>
+    <!-- AKTİF SİPARİŞ KUTUSU -->
+    <section class="courier-active-order">
+        <h2 class="courier-active-title">Aktif Sipariş</h2>
 
-        <div style="margin-bottom: 16px;">
-            <h3 style="color: #d8a451; font-size: 14px; margin-bottom: 8px;">📍 Restoran</h3>
-            <p style="margin: 4px 0; font-size: 14px;"><strong>{{ siparis[14] }}</strong></p>
-            <p style="margin: 4px 0; font-size: 12px; color: #bfa78a;">{{ siparis[16] }}</p>
-            <p style="margin: 4px 0; font-size: 12px; color: #bfa78a;">Tel: {{ siparis[15] }}</p>
+        <div class="courier-block">
+            <h3 class="courier-block-title">📍 Restoran</h3>
+            <p class="courier-block-main"><strong>{{ siparis[14] }}</strong></p>
+            <p class="courier-block-sub">{{ siparis[16] }}</p>
+            <p class="courier-block-sub">Tel: {{ siparis[15] }}</p>
         </div>
 
-        <div style="border-top: 1px solid #4ade80; padding-top: 12px;">
-            <h3 style="color: #d8a451; font-size: 14px; margin-bottom: 8px;">🏠 Teslimat Adresi</h3>
-            <p style="margin: 4px 0; font-size: 14px;"><strong>{{ siparis[3] }} {{ siparis[4] }}</strong></p>
-            <p style="margin: 4px 0; font-size: 12px; color: #bfa78a;">Tel: {{ siparis[5] }}</p>
-            <p style="margin: 4px 0; font-size: 12px; color: #bfa78a;">
+        <div class="courier-block courier-block-divider">
+            <h3 class="courier-block-title">🏠 Teslimat Adresi</h3>
+            <p class="courier-block-main">
+                <strong>{{ siparis[3] }} {{ siparis[4] }}</strong>
+            </p>
+            <p class="courier-block-sub">Tel: {{ siparis[5] }}</p>
+            <p class="courier-block-sub">
                 {{ siparis[8] }} Mah., {{ siparis[9] }} Cad., No: {{ siparis[10] }}, Daire: {{ siparis[11] }}
             </p>
-            <p style="margin: 4px 0; font-size: 12px; color: #bfa78a;">{{ siparis[7] }}, {{ siparis[6] }}</p>
+            <p class="courier-block-sub">{{ siparis[7] }}, {{ siparis[6] }}</p>
         </div>
 
-        <div style="margin-top: 16px;">
-            <p style="font-size: 12px; color: #4ade80; font-weight: 600;">
+        <div class="courier-status-row">
+            <p class="courier-status-text">
                 Sipariş Durumu:
                 {% if siparis[1] == 'Cook' %}Hazırlanıyor
                 {% elif siparis[1] == 'OnWay' %}Yolda
@@ -62,226 +65,202 @@
             </p>
         </div>
 
-        <form action="/kurye/siparisTamamla" method="post" style="margin-top: 16px;">
+        <form action="/kurye/siparisTamamla" method="post" class="courier-complete-form">
             <input type="hidden" name="sparisNo" value="{{ siparis[0] }}">
-            <button type="submit" class="btn btn-success" style="width: 100%; background: #4ade80; color: #000;">
+            <button type="submit" class="btn btn-success">
                 ✅ Siparişi Teslim Et
             </button>
         </form>
-    </div>
+    </section>
     {% else %}
-    <div style="background: #1e140c; padding: 16px; border-radius: 8px; margin-top: 24px;">
-        <h2 style="color: #d8a451; font-size: 18px; margin-bottom: 12px;">📦 Bekleyen Siparişler</h2>
-        <p style="color: #bfa78a; font-size: 12px; margin-bottom: 12px;">Yakınınızdaki siparişleri kabul edebilirsiniz.</p>
-        <div id="bekleyen-siparisler-liste">
-            <p style="color: #bfa78a; font-size: 14px; text-align: center;">Yükleniyor...</p>
+    <!-- BEKLEYEN SİPARİŞLER KUTUSU -->
+    <section class="courier-waiting-orders">
+        <h2 class="courier-waiting-title">📦 Bekleyen Siparişler</h2>
+        <p class="courier-waiting-subtitle">
+            Yakınınızdaki siparişleri kabul edebilirsiniz.
+        </p>
+        <div id="bekleyen-siparisler-liste" class="courier-waiting-list">
+            <p class="courier-waiting-loading">Yükleniyor...</p>
         </div>
-    </div>
+    </section>
     {% endif %}
 
     {% else %}
-    <p style="color: #ff6b6b; margin-top: 16px;">Kurye bilgileri yüklenemedi.</p>
+    <p class="courier-error-text">Kurye bilgileri yüklenemedi.</p>
     {% endif %}
 </div>
 
 <script>
-let koordinatIntervalId = null;
-let isWorking = {{ 'true' if kurye and kurye[5] else 'false' }};
+    let koordinatIntervalId = null;
+    let isWorking = {{ 'true' if kurye and kurye[5] else 'false' }};
 
-function toggleCalisma() {
-    const btn = document.getElementById('ise-basla-btn');
-    const currentState = btn.getAttribute('data-working');
-    const newState = currentState === '1' ? '0' : '1';
+    function toggleCalisma() {
+        const btn = document.getElementById('ise-basla-btn');
+        const currentState = btn.getAttribute('data-working');
+        const newState = currentState === '1' ? '0' : '1';
 
-    const formData = new FormData();
-    formData.append('durum', newState);
+        const formData = new FormData();
+        formData.append('durum', newState);
 
-    fetch('/kurye/iseBasla', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            isWorking = data.isWorking;
-            btn.setAttribute('data-working', newState);
-            btn.textContent = newState === '1' ? 'İşi Bitir' : 'İşe Başla';
-
-            const badge = document.getElementById('durum-badge');
-            badge.textContent = newState === '1' ? 'Çalışıyor' : 'Çalışmıyor';
-            badge.style.background = newState === '1' ? '#4ade80' : '#6b7280';
-            badge.style.color = newState === '1' ? '#000' : '#fff';
-
-            if (newState === '1') {
-                koordinatGondermeBaslat();
-            } else {
-                koordinatGondermeDurdur();
-            }
-
-            location.reload();
-        } else {
-            alert('Durum değiştirilemedi: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Hata:', error);
-        alert('Bir hata oluştu.');
-    });
-}
-
-function koordinatGondermeBaslat() {
-    if (koordinatIntervalId) return;
-
-    konumGuncelle();
-
-    koordinatIntervalId = setInterval(() => {
-        konumGuncelle();
-    }, 30000);
-}
-
-function koordinatGondermeDurdur() {
-    if (koordinatIntervalId) {
-        clearInterval(koordinatIntervalId);
-        koordinatIntervalId = null;
-    }
-}
-
-function konumGuncelle() {
-    if (!navigator.geolocation) {
-        console.error('Tarayıcınız konum özelliğini desteklemiyor.');
-        document.getElementById('konum-text').textContent = 'Konum özelliği desteklenmiyor.';
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const x = position.coords.longitude;
-            const y = position.coords.latitude;
-
-            const formData = new FormData();
-            formData.append('x', x);
-            formData.append('y', y);
-
-            fetch('/kurye/koordinatGuncelle', {
-                method: 'POST',
-                body: formData
-            })
+        fetch('/kurye/iseBasla', {
+            method: 'POST',
+            body: formData
+        })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const now = new Date().toLocaleTimeString('tr-TR');
-                    document.getElementById('konum-text').textContent =
-                        `Son konum güncellemesi: ${now} (Lat: ${y.toFixed(6)}, Lng: ${x.toFixed(6)})`;
-                    console.log('Konum güncellendi:', x, y);
+                    isWorking = data.isWorking;
+                    btn.setAttribute('data-working', newState);
+                    btn.textContent = newState === '1' ? 'İşi Bitir' : 'İşe Başla';
+
+                    const badge = document.getElementById('durum-badge');
+                    badge.textContent = newState === '1' ? 'Çalışıyor' : 'Çalışmıyor';
+                    badge.classList.toggle('badge-working', newState === '1');
+                    badge.classList.toggle('badge-idle', newState !== '1');
+
+                    if (newState === '1') {
+                        koordinatGondermeBaslat();
+                    } else {
+                        koordinatGondermeDurdur();
+                    }
+
+                    location.reload();
                 } else {
-                    console.error('Konum güncellenemedi:', data.message);
+                    alert('Durum değiştirilemedi: ' + data.message);
                 }
             })
             .catch(error => {
-                console.error('Konum gönderme hatası:', error);
+                console.error('Hata:', error);
+                alert('Bir hata oluştu.');
             });
-        },
-        (error) => {
-            console.error('Konum alınamadı:', error);
-            document.getElementById('konum-text').textContent = 'Konum izni verilmedi veya alınamadı.';
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
+    }
+
+    function koordinatGondermeBaslat() {
+        if (koordinatIntervalId) return;
+
+        konumGuncelle();
+
+        koordinatIntervalId = setInterval(() => {
+            konumGuncelle();
+        }, 30000);
+    }
+
+    function koordinatGondermeDurdur() {
+        if (koordinatIntervalId) {
+            clearInterval(koordinatIntervalId);
+            koordinatIntervalId = null;
         }
-    );
-}
+    }
 
-if (isWorking) {
-    koordinatGondermeBaslat();
-}
+    function konumGuncelle() {
+        if (!navigator.geolocation) {
+            console.error('Tarayıcınız konum özelliğini desteklemiyor.');
+            document.getElementById('konum-text').textContent = 'Konum özelliği desteklenmiyor.';
+            return;
+        }
 
-// Bekleyen siparişleri yükle
-function bekleyenSiparisleriYukle() {
-    fetch('/kurye/bekleyenSiparisler', {
-        method: 'GET'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success && data.siparisler) {
-            const liste = document.getElementById('bekleyen-siparisler-liste');
-            if (data.siparisler.length === 0) {
-                liste.innerHTML = '<p style="color: #bfa78a; font-size: 14px; text-align: center;">Şu anda bekleyen sipariş yok.</p>';
-            } else {
-                let html = '';
-                data.siparisler.forEach(siparis => {
-                    html += `
-                        <div style="background: #2d1f0f; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #d8a451;">
-                            <div style="margin-bottom: 8px;">
-                                <p style="font-size: 14px; font-weight: 600; color: #d8a451;">Sipariş #${siparis.sparisNo}</p>
-                                <p style="font-size: 12px; color: #bfa78a; margin: 4px 0;">
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const x = position.coords.longitude;
+                const y = position.coords.latitude;
+
+                const formData = new FormData();
+                formData.append('x', x);
+                formData.append('y', y);
+
+                fetch('/kurye/koordinatGuncelle', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const now = new Date().toLocaleTimeString('tr-TR');
+                            document.getElementById('konum-text').textContent =
+                                `Son konum güncellemesi: ${now} (Lat: ${y.toFixed(6)}, Lng: ${x.toFixed(6)})`;
+                            console.log('Konum güncellendi:', x, y);
+                        } else {
+                            console.error('Konum güncellenemedi:', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Konum gönderme hatası:', error);
+                    });
+            },
+            (error) => {
+                console.error('Konum alınamadı:', error);
+                document.getElementById('konum-text').textContent = 'Konum izni verilmedi veya alınamadı.';
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    if (isWorking) {
+        koordinatGondermeBaslat();
+    }
+
+    // Bekleyen siparişleri yükle
+    function bekleyenSiparisleriYukle() {
+        fetch('/kurye/bekleyenSiparisler', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.siparisler) {
+                    const liste = document.getElementById('bekleyen-siparisler-liste');
+                    if (data.siparisler.length === 0) {
+                        liste.innerHTML = '<p class="courier-waiting-empty">Şu anda bekleyen sipariş yok.</p>';
+                    } else {
+                        let html = '';
+                        data.siparisler.forEach(siparis => {
+                            html += `
+                        <div class="courier-order-card">
+                            <div class="courier-order-card-body">
+                                <p class="courier-order-id">Sipariş #${siparis.sparisNo}</p>
+                                <p class="courier-order-line">
                                     <strong>Müşteri:</strong> ${siparis.efendiName} ${siparis.efendiSurname}
                                 </p>
-                                <p style="font-size: 12px; color: #bfa78a; margin: 4px 0;">
+                                <p class="courier-order-line">
                                     <strong>Restoran:</strong> ${siparis.restoranName}
                                 </p>
-                                <p style="font-size: 12px; color: #bfa78a; margin: 4px 0;">
+                                <p class="courier-order-line">
                                     <strong>Adres:</strong> ${siparis.restoranAdres}
                                 </p>
-                                <p style="font-size: 12px; color: #4ade80; margin: 4px 0;">
+                                <p class="courier-order-distance">
                                     <strong>Mesafe:</strong> ~${siparis.mesafe} km
                                 </p>
                             </div>
                             <form action="/kurye/siparisKabulEt" method="post">
                                 <input type="hidden" name="sparisNo" value="${siparis.sparisNo}">
-                                <button type="submit" class="btn btn-success" style="width: 100%; padding: 8px; font-size: 14px;">
+                                <button type="submit" class="btn btn-success">
                                     ✅ Siparişi Kabul Et
                                 </button>
                             </form>
                         </div>
                     `;
-                });
-                liste.innerHTML = html;
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Bekleyen siparişler yüklenemedi:', error);
-        document.getElementById('bekleyen-siparisler-liste').innerHTML =
-            '<p style="color: #ff6b6b; font-size: 14px; text-align: center;">Siparişler yüklenemedi.</p>';
+                        });
+                        liste.innerHTML = html;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Bekleyen siparişler yüklenemedi:', error);
+                document.getElementById('bekleyen-siparisler-liste').innerHTML =
+                    '<p class="courier-error-text">Siparişler yüklenemedi.</p>';
+            });
+    }
+
+    {% if not siparis %}
+    bekleyenSiparisleriYukle();
+    setInterval(bekleyenSiparisleriYukle, 30000);
+    {% endif %}
+
+    window.addEventListener('beforeunload', () => {
+        koordinatGondermeDurdur();
     });
-}
-
-// Eğer aktif sipariş yoksa bekleyen siparişleri yükle
-{% if not siparis %}
-bekleyenSiparisleriYukle();
-// Her 30 saniyede bir yenile
-setInterval(bekleyenSiparisleriYukle, 30000);
-{% endif %}
-
-window.addEventListener('beforeunload', () => {
-    koordinatGondermeDurdur();
-});
 </script>
-
-<style>
-.badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-weight: 600;
-}
-
-.btn-success {
-    background: #4ade80;
-    color: #000;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-success:hover {
-    background: #22c55e;
-    transform: translateY(-2px);
-}
-</style>
 {% endblock %}

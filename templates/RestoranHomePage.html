@@ -4,14 +4,20 @@
 
 {% block content %}
 <div class="card restoran-home-card">
-    <h1>Restoran Paneli</h1>
-    <p class="subtitle">
-        Menünü görüntüleyebilir ve yeni ürün ekleyebilirsin.
-    </p>
+    <div class="restoran-header">
+        <h1>Restoran Paneli</h1>
+        <p class="subtitle">
+            Menünü görüntüleyebilir ve yeni ürün ekleyebilirsin.
+        </p>
+    </div>
 
     <div class="restoran-actions-row">
-        <a href="/restoranSiparisler" class="btn btn-success">📦 Siparişleri Görüntüle</a>
-        <a href="/addYemek" class="btn btn-primary">+ Yeni Yemek Ekle</a>
+        <a href="/restoranSiparisler" class="btn btn-accent">
+            Siparişleri Görüntüle
+        </a>
+        <a href="/addYemek" class="btn btn-primary">
+            + Yeni Yemek Ekle
+        </a>
     </div>
 
     <h2 class="section-title">Mevcut Yemekler</h2>
@@ -26,16 +32,17 @@
             </div>
 
             <div class="restoran-menu-actions">
-                <!-- ileride eklenecek -->
-                <!-- <button class="btn btn-secondary btn-sm">Düzenle</button> -->
-                <!-- <button class="btn btn-secondary btn-sm">Sil</button> -->
+                {# ileride butonlar için alan #}
+                {# <button class="btn btn-secondary btn-sm">Düzenle</button> #}
+                {# <button class="btn btn-secondary btn-sm">Sil</button> #}
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <p class="subtitle">Henüz menü eklenmemiş.</p>
+    <p class="restoran-empty-menu">
+        Henüz menü eklenmemiş. İlk yemeğini ekleyerek sipariş almaya başlayabilirsin. 🍽️
+    </p>
     {% endif %}
-
 </div>
 {% endblock %}

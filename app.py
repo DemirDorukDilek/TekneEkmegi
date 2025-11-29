@@ -151,6 +151,51 @@ def RestoranHomePage_get():
     yemekler = sql_querry("sql/restoran/YemekleriListele.sql", (restoranID,))
     return render_template("RestoranHomePage.html", yemekler=yemekler)
 
+@app.route("/restoranProfil", methods=["GET", "POST"])
+@login_required(TYPES.R)
+def restoran_profil():
+    restoran_id = session.get("user_id")
+
+    conn = sql.connect(**DB_CONFIG)
+    cur = conn.cursor()
+
+    # PROFIL GÜNCELLEME
+    if request.method == "POST":
+        name = request.form.get("name")
+        telno = request.form.get("telno")
+        adress_form = request.form.get("adress")  # formdaki ismi aynen okuyoruz
+        Minsepet = request.form.get("Minsepet")
+
+        cur.execute(
+            """
+            UPDATE restoran
+            SET name=%s,
+                telno=%s,
+                adres=%s,
+                minsepettutari=%s
+            WHERE ID=%s
+            """,
+            (name, telno, adress_form, Minsepet, restoran_id),
+        )
+        conn.commit()
+        flash("Restoran profilin güncellendi.", "success")
+
+    # MEVCUT BILGILER
+    cur.execute(
+        """
+        SELECT ID, name, telno, adres, minsepettutari
+        FROM restoran
+        WHERE ID=%s
+        """,
+        (restoran_id,),
+    )
+    restoran = cur.fetchone()
+
+    conn.close()
+    return render_template("restoranProfil.html", restoran=restoran)
+
+
+
 
 @app.route("/restoranSiparisler")
 @login_required(TYPES.R)
@@ -799,6 +844,39 @@ def KuryeHomePage_get():
     siparis = aktif_siparis[0] if aktif_siparis else None
 
     return render_template("KuryeHomePage.html", kurye=kurye, siparis=siparis)
+
+@app.route("/kuryeProfil", methods=["GET", "POST"])
+@login_required(TYPES.K)
+def kurye_profil():
+    kurye_id = session.get("user_id")
+
+    conn = sql.connect(**DB_CONFIG)
+    cur = conn.cursor()
+
+    # ========== PROFIL GÜNCELLEME ==========
+    if request.method == "POST":
+        ad = request.form.get("name")
+        soyad = request.form.get("surname")
+        telno = request.form.get("telno")   # ← dikkat: telno
+        email = request.form.get("email")   # ← ister eklersin ister çıkartırsın
+
+        cur.execute(
+            "UPDATE kurye SET name=%s, surname=%s, telno=%s, email=%s WHERE ID=%s",
+            (ad, soyad, telno, email, kurye_id),
+        )
+        conn.commit()
+        flash("Profil bilgilerin güncellendi.", "success")
+
+    # ========== MEVCUT BILGILER ==========
+    cur.execute(
+        "SELECT ID, name, surname, telno, email FROM kurye WHERE ID=%s",
+        (kurye_id,),
+    )
+    kurye = cur.fetchone()
+
+    conn.close()
+
+    return render_template("kuryeProfil.html", kurye=kurye)
 
 
 @app.route("/kurye/iseBasla", methods=["POST"])

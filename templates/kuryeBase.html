@@ -10,12 +10,12 @@
 
 <body>
 
+    <!-- ========================= NAVBAR ========================= -->
     <header class="navbar kurye-navbar">
         <div class="navbar-left">
-            <a href="/" class="navbar-logo"
-                style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
-                <img src="{{ url_for('static', filename='tekne_logo.png') }}" alt="Tekne Ekmeği Logo" style="height:40px;">
-                <span>Tekne Ekmeği</span>
+            <a href="/KuryeHomePage" class="navbar-logo">
+                <img src="{{ url_for('static', filename='tekne_logo.png') }}" alt="Logo" class="navbar-logo-img">
+                <span class="navbar-logo-text">Tekne Ekmeği</span>
             </a>
         </div>
 
@@ -26,13 +26,14 @@
         </div>
     </header>
 
-    <!-- PROFIL MENÜSÜ -->
+    <!-- ========================= PROFIL MENÜSÜ ========================= -->
     <div id="profile-menu" class="dropdown-menu profile-menu">
+        <a href="/kuryeProfil">Profil Bilgilerim</a>
         <a href="/KuryeHomePage">Aktif Görevler</a>
-        <a href="/logout">Çıkış yap</a>
+        <a href="/logout">Çıkış Yap</a>
     </div>
 
-    <!-- FLASH TOAST -->
+    <!-- ========================= FLASH MESAJLAR ========================= -->
     <div class="flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -43,18 +44,19 @@
         {% endwith %}
     </div>
 
+    <!-- ========================= SAYFA İÇERİĞİ ========================= -->
     <main class="page-container">
         {% block content %}{% endblock %}
     </main>
 
+    <!-- ========================= SCRIPTLER ========================= -->
     <script>
         function toggleProfileMenu() {
             const menu = document.getElementById("profile-menu");
-            if (menu.style.display === "flex") menu.style.display = "none";
-            else menu.style.display = "flex";
+            menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
         }
 
-        // Menü dışına tıklayınca kapansın
+        // Menü dışına tıklayınca kapanması
         document.addEventListener('click', function (e) {
             const menu = document.getElementById("profile-menu");
             const icon = document.querySelector(".profile-icon");
@@ -64,7 +66,7 @@
             }
         });
 
-        // Flash otomatik yok etme
+        // Flash mesajları otomatik yok et
         document.addEventListener("DOMContentLoaded", function () {
             const flashes = document.querySelectorAll(".flash-message");
             flashes.forEach((el, i) => {
