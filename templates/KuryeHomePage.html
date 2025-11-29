@@ -70,9 +70,12 @@
         </form>
     </div>
     {% else %}
-    <div style="background: #1e140c; padding: 16px; border-radius: 8px; margin-top: 24px; text-align: center;">
-        <p style="color: #bfa78a; font-size: 14px;">Şu anda aktif siparişiniz yok.</p>
-        <p style="color: #bfa78a; font-size: 12px; margin-top: 8px;">İşe başladığınızda yeni siparişler size atanacak.</p>
+    <div style="background: #1e140c; padding: 16px; border-radius: 8px; margin-top: 24px;">
+        <h2 style="color: #d8a451; font-size: 18px; margin-bottom: 12px;">📦 Bekleyen Siparişler</h2>
+        <p style="color: #bfa78a; font-size: 12px; margin-bottom: 12px;">Yakınınızdaki siparişleri kabul edebilirsiniz.</p>
+        <div id="bekleyen-siparisler-liste">
+            <p style="color: #bfa78a; font-size: 14px; text-align: center;">Yükleniyor...</p>
+        </div>
     </div>
     {% endif %}
 
@@ -193,6 +196,64 @@ function konumGuncelle() {
 if (isWorking) {
     koordinatGondermeBaslat();
 }
+
+// Bekleyen siparişleri yükle
+function bekleyenSiparisleriYukle() {
+    fetch('/kurye/bekleyenSiparisler', {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.siparisler) {
+            const liste = document.getElementById('bekleyen-siparisler-liste');
+            if (data.siparisler.length === 0) {
+                liste.innerHTML = '<p style="color: #bfa78a; font-size: 14px; text-align: center;">Şu anda bekleyen sipariş yok.</p>';
+            } else {
+                let html = '';
+                data.siparisler.forEach(siparis => {
+                    html += `
+                        <div style="background: #2d1f0f; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #d8a451;">
+                            <div style="margin-bottom: 8px;">
+                                <p style="font-size: 14px; font-weight: 600; color: #d8a451;">Sipariş #${siparis.sparisNo}</p>
+                                <p style="font-size: 12px; color: #bfa78a; margin: 4px 0;">
+                                    <strong>Müşteri:</strong> ${siparis.efendiName} ${siparis.efendiSurname}
+                                </p>
+                                <p style="font-size: 12px; color: #bfa78a; margin: 4px 0;">
+                                    <strong>Restoran:</strong> ${siparis.restoranName}
+                                </p>
+                                <p style="font-size: 12px; color: #bfa78a; margin: 4px 0;">
+                                    <strong>Adres:</strong> ${siparis.restoranAdres}
+                                </p>
+                                <p style="font-size: 12px; color: #4ade80; margin: 4px 0;">
+                                    <strong>Mesafe:</strong> ~${siparis.mesafe} km
+                                </p>
+                            </div>
+                            <form action="/kurye/siparisKabulEt" method="post">
+                                <input type="hidden" name="sparisNo" value="${siparis.sparisNo}">
+                                <button type="submit" class="btn btn-success" style="width: 100%; padding: 8px; font-size: 14px;">
+                                    ✅ Siparişi Kabul Et
+                                </button>
+                            </form>
+                        </div>
+                    `;
+                });
+                liste.innerHTML = html;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Bekleyen siparişler yüklenemedi:', error);
+        document.getElementById('bekleyen-siparisler-liste').innerHTML =
+            '<p style="color: #ff6b6b; font-size: 14px; text-align: center;">Siparişler yüklenemedi.</p>';
+    });
+}
+
+// Eğer aktif sipariş yoksa bekleyen siparişleri yükle
+{% if not siparis %}
+bekleyenSiparisleriYukle();
+// Her 30 saniyede bir yenile
+setInterval(bekleyenSiparisleriYukle, 30000);
+{% endif %}
 
 window.addEventListener('beforeunload', () => {
     koordinatGondermeDurdur();

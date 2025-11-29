@@ -337,6 +337,15 @@ input:focus {
     background: var(--button-hover);
 }
 
+.btn-success {
+    background: #4ade80;
+    color: #000000;
+}
+
+.btn-success:hover {
+    background: #22c55e;
+}
+
 .btn-secondary {
     background: transparent;
     border: 1px solid var(--accent);

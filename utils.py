@@ -36,7 +36,7 @@ def make_index():
 def sql_querry(querry,args):
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(buffered=True)
         code = read_file(querry) if os.path.isfile(querry) else querry
         with open("sql_querry_log","a",encoding="utf-8") as f:
             f.write(code+"\n")

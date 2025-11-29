@@ -152,6 +152,25 @@ def RestoranHomePage_get():
     return render_template("RestoranHomePage.html", yemekler=yemekler)
 
 
+@app.route("/restoranSiparisler")
+@login_required(TYPES.R)
+def restoran_siparisler():
+    restoranID = session.get("user_id")
+    siparisler = sql_querry("sql/restoran/SiparisleriGetir.sql", (restoranID,)) or []
+
+    # Her sipariş için detayları al
+    siparisler_detayli = []
+    for siparis in siparisler:
+        siparis_no = siparis[0]
+        detaylar = sql_querry("sql/restoran/SiparisDetayGetir.sql", (siparis_no, restoranID)) or []
+        siparisler_detayli.append({
+            "siparis": siparis,
+            "detaylar": detaylar
+        })
+
+    return render_template("RestoranSiparisler.html", siparisler=siparisler_detayli)
+
+
 # ============================================
 # PROFİL VE AYARLAR
 # ============================================
@@ -552,11 +571,10 @@ def siparis_olustur():
             return redirect("/adreslerim")
         
         toplam_fiyat = sum(urun[2] * urun[3] for urun in sepet_urunler)
-        
+
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        restoranID = sepet_urunler[0][5]
+
         cursor.execute(read_file("sql/SiparisVerme/siparisOlustur.sql"), (efendiID, selected_adres))
         sparisNo = cursor.lastrowid
         
@@ -572,23 +590,10 @@ def siparis_olustur():
                 cursor.execute(read_file("sql/odeme/kredikarti.sql"),(sparisNo, toplam_fiyat, kart_no))
         else:
             cursor.execute(read_file("sql/odeme/nakitOdemeEkle.sql"),(sparisNo, toplam_fiyat))
-        
-        tried = []
-        for _ in range(15):
-            placehoder = f" k.id NOT IN ({','.join(tried)}) AND" if tried else ""
-            res = sql_querry(read_file("sql/kurye/Enyakinkuryebul.sql").replace("WHERE","WHERE" + placehoder), (restoranID,))
-            if res and len(res) > 0:
-                kuryeID = res[0][0]
-                # TODO ASK PREMISION tried e ekle
-                cursor.execute(read_file("sql/kurye/Kuryeata.sql"),(kuryeID, sparisNo))
-                print(f"Sipariş {sparisNo} için kurye {kuryeID} atandı")
-                break
-            else:
-                print(f"Sipariş {sparisNo} için müsait kurye bulunamadı")
-                raise Exception("Kurye bulinamadi")
-        else:
-            print(f"Sipariş {sparisNo} için müsait kurye bulunamadı")
-            raise
+
+        # Sipariş oluşturuldu, kuryeler manuel olarak kabul edecek
+        print(f"Sipariş {sparisNo} oluşturuldu, kuryeler tarafından kabul edilmesi bekleniyor...")
+
         sql_querry("sql/Siparis/Sepetitemizle.sql", (efendiID,))
 
         conn.commit()
@@ -864,6 +869,48 @@ def kurye_aktif_siparis():
         print(f"Aktif sipariş getirme hatası: {e}")
         traceback.print_exc()
         return {"success": False, "message": str(e)}, 500
+
+
+@app.route("/kurye/bekleyenSiparisler", methods=["GET"])
+@login_required(TYPES.K)
+def kurye_bekleyen_siparisler():
+    kuryeID = session.get("user_id")
+    try:
+        bekleyen_siparisler = sql_querry("sql/kurye/BekleyenSiparislerGetir.sql", (kuryeID,))
+        if bekleyen_siparisler:
+            siparisler = []
+            for siparis in bekleyen_siparisler:
+                siparisler.append({
+                    "sparisNo": siparis[0],
+                    "teslimAdres": siparis[1],
+                    "efendiName": siparis[2],
+                    "efendiSurname": siparis[3],
+                    "restoranName": siparis[4],
+                    "restoranAdres": siparis[5],
+                    "mesafe": round(siparis[8], 2) if len(siparis) > 8 else 0
+                })
+            return {"success": True, "siparisler": siparisler}
+        return {"success": True, "siparisler": []}
+    except Exception as e:
+        print(f"Bekleyen siparişler getirme hatası: {e}")
+        traceback.print_exc()
+        return {"success": False, "message": str(e)}, 500
+
+
+@app.route("/kurye/siparisKabulEt", methods=["POST"])
+@login_required(TYPES.K)
+def kurye_siparis_kabul_et():
+    kuryeID = session.get("user_id")
+    sparisNo = request.form.get("sparisNo")
+
+    try:
+        sql_querry("sql/kurye/SiparisKabulEt.sql", (kuryeID, sparisNo))
+        flash("Sipariş kabul edildi!", "success")
+        return redirect("/KuryeHomePage")
+    except Exception as e:
+        print(f"Sipariş kabul etme hatası: {e}")
+        flash(f"Sipariş kabul edilirken hata oluştu: {e}", "danger")
+        return redirect("/KuryeHomePage")
 
 
 @app.route("/kurye/siparisOnayla", methods=["POST"])

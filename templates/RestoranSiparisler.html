@@ -1,0 +1,222 @@
+{% extends "restoranBase.html" %}
+
+{% block title %}Siparişlerim · Tekne Ekmeği{% endblock %}
+
+{% block content %}
+<div class="card restoran-home-card">
+    <h1>Gelen Siparişler</h1>
+    <p class="subtitle">
+        Restoranınıza gelen aktif siparişleri buradan takip edebilirsiniz.
+    </p>
+
+    <div class="restoran-actions-row">
+        <a href="/RestoranHomePage" class="btn btn-secondary">← Ana Sayfa</a>
+    </div>
+
+    <h2 class="section-title">Aktif Siparişler</h2>
+
+    {% if siparisler and siparisler|length > 0 %}
+    <div class="siparis-list">
+        {% for item in siparisler %}
+        {% set siparis = item.siparis %}
+        {% set detaylar = item.detaylar %}
+        <div class="siparis-card">
+            <div class="siparis-header">
+                <div>
+                    <h3 class="siparis-no">Sipariş #{{ siparis[0] }}</h3>
+                    <span class="siparis-durum siparis-durum-{{ siparis[1]|lower }}">
+                        {% if siparis[1] == 'Get' %}Bekliyor
+                        {% elif siparis[1] == 'Cook' %}Hazırlanıyor
+                        {% elif siparis[1] == 'OnWay' %}Yolda
+                        {% else %}{{ siparis[1] }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <div class="siparis-info">
+                <div class="info-section">
+                    <h4>👤 Müşteri Bilgileri</h4>
+                    <p><strong>Ad Soyad:</strong> {{ siparis[3] }} {{ siparis[4] }}</p>
+                    <p><strong>Telefon:</strong> {{ siparis[5] }}</p>
+                </div>
+
+                <div class="info-section">
+                    <h4>📍 Teslimat Adresi</h4>
+                    <p>{{ siparis[11] }} Mah., {{ siparis[12] }} Cad., No: {{ siparis[13] }}, Daire: {{ siparis[14] }}</p>
+                    <p>{{ siparis[10] }}, {{ siparis[9] }}</p>
+                </div>
+
+                {% if siparis[6] %}
+                <div class="info-section">
+                    <h4>🏍️ Kurye Bilgileri</h4>
+                    <p><strong>Ad Soyad:</strong> {{ siparis[6] }} {{ siparis[7] }}</p>
+                    <p><strong>Telefon:</strong> {{ siparis[8] }}</p>
+                </div>
+                {% else %}
+                <div class="info-section kurye-bekleniyor">
+                    <h4>🏍️ Kurye Bilgileri</h4>
+                    <p style="color: #ff9800; font-style: italic;">Kurye ataması bekleniyor...</p>
+                </div>
+                {% endif %}
+
+                {% if detaylar and detaylar|length > 0 %}
+                <div class="info-section">
+                    <h4>🍽️ Sipariş Detayları</h4>
+                    <table class="siparis-detay-tablo">
+                        <thead>
+                            <tr>
+                                <th>Yemek</th>
+                                <th>Fiyat</th>
+                                <th>Adet</th>
+                                <th>Toplam</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detay in detaylar %}
+                            <tr>
+                                <td>{{ detay[0] }}</td>
+                                <td>{{ "%.2f"|format(detay[1]) }} ₺</td>
+                                <td>{{ detay[2] }}</td>
+                                <td>{{ "%.2f"|format(detay[3]) }} ₺</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" style="text-align: right;"><strong>Toplam:</strong></td>
+                                <td><strong>{{ "%.2f"|format(detaylar|sum(attribute=3)) }} ₺</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="subtitle" style="text-align: center; margin-top: 24px;">Henüz aktif sipariş yok.</p>
+    {% endif %}
+</div>
+
+<style>
+.siparis-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.siparis-card {
+    background: #1e140c;
+    border: 2px solid #d8a451;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.siparis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #d8a451;
+}
+
+.siparis-no {
+    color: #d8a451;
+    font-size: 20px;
+    margin: 0 0 8px 0;
+}
+
+.siparis-durum {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.siparis-durum-get {
+    background: #ff9800;
+    color: #000;
+}
+
+.siparis-durum-cook {
+    background: #2196f3;
+    color: #fff;
+}
+
+.siparis-durum-onway {
+    background: #4ade80;
+    color: #000;
+}
+
+.siparis-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.info-section {
+    background: #2d1f0f;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.info-section h4 {
+    color: #d8a451;
+    font-size: 14px;
+    margin: 0 0 8px 0;
+}
+
+.info-section p {
+    color: #bfa78a;
+    font-size: 13px;
+    margin: 4px 0;
+}
+
+.kurye-bekleniyor {
+    border: 2px dashed #ff9800;
+}
+
+.siparis-detay-tablo {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+}
+
+.siparis-detay-tablo th,
+.siparis-detay-tablo td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #3d2f1f;
+    color: #bfa78a;
+    font-size: 13px;
+}
+
+.siparis-detay-tablo th {
+    color: #d8a451;
+    font-weight: 600;
+}
+
+.siparis-detay-tablo tfoot td {
+    border-bottom: none;
+    padding-top: 12px;
+    color: #d8a451;
+}
+
+.restoran-actions-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.section-title {
+    color: #d8a451;
+    font-size: 18px;
+    margin: 24px 0 16px 0;
+}
+</style>
+{% endblock %}
