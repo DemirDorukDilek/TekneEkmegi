@@ -155,3 +155,50 @@ CREATE TABLE krediKartiOdeme(
     CONSTRAINT krediKartiFK FOREIGN KEY(Kartno) REFERENCES kredikarti(Kartno),
     CONSTRAINT UNQspraisNo UNIQUE (sparisNo)
 );
+
+--DELIMITER//
+
+CREATE TRIGGER check_single_restaurant_before_insert
+BEFORE INSERT ON sepetUrunler
+FOR EACH ROW
+BEGIN
+    DECLARE existing_restaurant_id INT;
+
+    -- Müşterinin sepetinde mevcut bir restoranID var mı kontrol et
+    SELECT DISTINCT y.restoranID INTO existing_restaurant_id
+    FROM sepetUrunler su
+    JOIN yemek y ON su.yemekID = y.ID
+    WHERE su.efendiID = NEW.efendiID
+    LIMIT 1;
+
+    -- Eğer varsa ve yeni eklenen yemeğin restoranı farklıysa hata ver
+    IF existing_restaurant_id IS NOT NULL THEN
+        IF existing_restaurant_id != (SELECT restoranID FROM yemek WHERE ID = NEW.yemekID) THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Sepetinizde farklı bir restorandan ürün var. Lütfen önce sepetinizi boşaltın.';
+        END IF;
+    END IF;
+END//
+
+CREATE TRIGGER check_single_restaurant_before_update
+BEFORE UPDATE ON sepetUrunler
+FOR EACH ROW
+BEGIN
+    DECLARE existing_restaurant_id INT;
+
+    -- Müşterinin sepetinde mevcut bir restoranID var mı kontrol et (güncellenen satır hariç)
+    SELECT DISTINCT y.restoranID INTO existing_restaurant_id
+    FROM sepetUrunler su
+    JOIN yemek y ON su.yemekID = y.ID
+    WHERE su.efendiID = NEW.efendiID
+      AND su.yemekID != OLD.yemekID
+    LIMIT 1;
+
+    -- Eğer varsa ve yeni yemeğin restoranı farklıysa hata ver
+    IF existing_restaurant_id IS NOT NULL THEN
+        IF existing_restaurant_id != (SELECT restoranID FROM yemek WHERE ID = NEW.yemekID) THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Sepetinizde farklı bir restorandan ürün var. Lütfen önce sepetinizi boşaltın.';
+        END IF;
+    END IF;
+END//

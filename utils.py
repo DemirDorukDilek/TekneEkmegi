@@ -17,12 +17,38 @@ def make_db():
     make_table()
     make_index()
 
+def execute_delimiter(code,cursor):
+    # // ile ayrılmış trigger/procedure kodlarını çalıştır
+    statements = code.split("//")
+    for statement in statements:
+        statement = statement.strip()
+        if len(statement) > 0:
+            cursor.execute(statement)
+
 def make_table():
     conn = get_db_connection()
     cursor = conn.cursor()
-    for l in read_file("sql/CreateTable.sql").split(";"):
-        if len(l.strip()) > 0:
-            cursor.execute(l.strip()+";")
+    sql_content = read_file("sql/CreateTable.sql")
+
+    # --DELIMITER// ile başlayan kısım varsa ayır
+    if "--DELIMITER//" in sql_content:
+        normal_sql, delimiter_sql = sql_content.split("--DELIMITER//", 1)
+
+        # Normal SQL'leri çalıştır
+        for l in normal_sql.split(";"):
+            code = l.strip()
+            if len(code) > 0:
+                cursor.execute(code+";")
+
+        # Trigger'ları çalıştır
+        execute_delimiter(delimiter_sql, cursor)
+    else:
+        # Eski format
+        for l in sql_content.split(";"):
+            code = l.strip()
+            if len(code) > 0:
+                cursor.execute(code+";")
+
     conn.commit()
 
 def make_index():
