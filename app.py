@@ -3,11 +3,13 @@ from functools import wraps
 import secrets
 import time
 import traceback
+import threading
 from flask import Flask, render_template, request, redirect, flash, session,abort
 import pyodbc
 from werkzeug.security import generate_password_hash, check_password_hash
 from utils import *
 import os
+import numpy as np
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
@@ -19,6 +21,9 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(days=30)
 )
 
+REF_LAT = 39.92500
+REF_LON = 32.83694
+
 
 class TYPES:
     R = "restoran"
@@ -29,6 +34,36 @@ class TYPES:
 def banka_islemi_gerceklestir(*args):
     time.sleep(2)
     return True
+
+
+def otomatik_siparis_iptal(sparisNo, efendiID):
+    time.sleep(60)
+
+    try:
+        durum_result = sql_querry(
+            "SELECT durum FROM sparis WHERE sparisNo = ?",
+            (sparisNo,)
+        )
+
+        if durum_result and durum_result[0][0] == "Get":
+            sql_querry(
+                "UPDATE sparis SET durum = ? WHERE sparisNo = ?",
+                ("Cancelled", sparisNo)
+            )
+            print(f"Sipariş {sparisNo} 60 saniye içinde kabul edilmediği için iptal edildi.")
+
+            sql_querry(
+                "UPDATE nakitOdeme SET ParaTeslimAlindi = 0 WHERE sparisNo = ?",
+                (sparisNo,)
+            )
+            sql_querry(
+                "UPDATE krediKartiOdeme SET ParaTeslimAlindi = 0 WHERE sparisNo = ?",
+                (sparisNo,)
+            )
+
+    except Exception as e:
+        print(f"Otomatik iptal hatası (Sipariş {sparisNo}): {e}")
+        traceback.print_exc()
 
 
 def check_session_validity():
@@ -67,6 +102,10 @@ def login(user_id, as_):
     session["login_time"] = time.time()
     session["user_id"] = user_id
     session["as"] = as_
+    rows = sql_querry("SELECT adresName FROM Adres WHERE efendiID = ? ORDER BY adresName",(session["user_id"],)) or []
+    if rows and not session.get("selected_adresName",None):
+        selected_adresName = rows[0][0]
+        session["selected_adresName"] = selected_adresName
 
 
 @app.context_processor
@@ -114,7 +153,8 @@ def index_get():
 @login_required(TYPES.E)
 def HomePage_Get():
     user_id = session["user_id"]
-    restoranlar = sql_querry("sql/RestoranListele.sql", (user_id,)) or []
+    selected_adres = session.get("selected_adresName")
+    restoranlar = sql_querry("sql/RestoranListele.sql", (user_id,selected_adres)) or []
     restoranlar = list(map(lambda x: [x[0], x[1], x[2]**0.5, x[3]], restoranlar))
 
     selected_name = session.get("selected_adresName")
@@ -128,6 +168,19 @@ def HomePage_Get():
         if rows:
             selected_adres = rows[0]
 
+    # İptal edilen siparişleri kontrol et
+    iptal_siparisler = sql_querry(
+        "SELECT sparisNo FROM sparis WHERE efendiID = ? AND durum = 'Cancelled' ORDER BY sparisNo DESC LIMIT 1",
+        (user_id,)
+    )
+    if iptal_siparisler:
+        flash(f"Siparişiniz (No: {iptal_siparisler[0][0]}) 60 saniye içinde kurye tarafından kabul edilmediği için iptal edildi. Para iadesi yapılacaktır.", "warning")
+        # İptal durumunu görüldü olarak işaretle (tekrar göstermemek için)
+        sql_querry(
+            "UPDATE sparis SET durum = 'CancelledSeen' WHERE sparisNo = ?",
+            (iptal_siparisler[0][0],)
+        )
+
     return render_template("HomePage.html",restoranlar=restoranlar,selected_adres=selected_adres)
 
 @app.route('/restoranFiltre', methods=['POST'])
@@ -135,11 +188,11 @@ def restoran_filtre():
     user_id = session["user_id"]
     data = request.get_json()
     filitre = (data.get('filitre',"")).strip()
-
+    selected_adres = session.get("selected_adresName")
     if filitre:
-        restoranlar = sql_querry("sql/RestoranListele2.sql", (user_id,f"%{filitre}%")) or []
+        restoranlar = sql_querry("sql/RestoranListele2.sql", (user_id,selected_adres,f"%{filitre}%")) or []
     else:
-        restoranlar = sql_querry("sql/RestoranListele.sql", (user_id,)) or []
+        restoranlar = sql_querry("sql/RestoranListele.sql", (user_id,selected_adres)) or []
     restoranlar = list(map(lambda x: [x[0], x[1], x[2]**0.5, x[3]], restoranlar))
 
     return render_template("partials/restoran_list.html", restoranlar=restoranlar)
@@ -420,8 +473,8 @@ def efendiAddAdress_post():
             cadde = request.form.get("Cadde")
             bina_no = request.form.get("binano")
             daire_no = request.form.get("daireno")
-            latitude = float(request.form.get("latitude"))
-            longitude = float(request.form.get("longitude"))
+            latitude = (float(request.form.get("latitude")) - REF_LAT) * 111320
+            longitude = (float(request.form.get("longitude")) - REF_LON) * 111320 * np.cos(REF_LAT*np.pi/180)
             user_id = session.get("user_id")
 
             sql_querry("sql/efendiAddAdress.sql", 
@@ -637,16 +690,23 @@ def siparis_olustur():
         else:
             cursor.execute(read_file("sql/odeme/nakitOdemeEkle.sql"),(sparisNo, toplam_fiyat))
 
-        # Sipariş oluşturuldu, kuryeler manuel olarak kabul edecek
         print(f"Sipariş {sparisNo} oluşturuldu, kuryeler tarafından kabul edilmesi bekleniyor...")
 
         sql_querry("sql/Siparis/Sepetitemizle.sql", (efendiID,))
 
         conn.commit()
-        
+
+        iptal_thread = threading.Thread(
+            target=otomatik_siparis_iptal,
+            args=(sparisNo, efendiID),
+            daemon=True
+        )
+        iptal_thread.start()
+
         flash(f"Siparişiniz başarıyla oluşturuldu! Sipariş No: {sparisNo}", "success")
         flash(f"Toplam tutar: {toplam_fiyat:.2f} ₺", "success")
-        
+        flash("Siparişiniz 60 saniye içinde bir kurye tarafından kabul edilmelidir.", "info")
+
         return redirect("/HomePage")
         
     except Exception as e:
@@ -769,8 +829,9 @@ def RestoranRegister_post():
         telno = request.form["telno"]
         adres = request.form["adress"]
         minsepet = request.form["Minsepet"]
-        latitude = request.form["latitude"]
-        longitude = request.form["longitude"]
+        latitude = (float(request.form.get("latitude")) - REF_LAT) * 111320
+        longitude = (float(request.form.get("longitude")) - REF_LON) * 111320 * np.cos(REF_LAT*np.pi/180)
+
         hashed_password = generate_password_hash(request.form["password"], method="pbkdf2:sha256")
 
         try:
@@ -902,8 +963,8 @@ def kurye_ise_basla():
 def kurye_koordinat_guncelle():
     kuryeID = session.get("user_id")
     try:
-        x = float(request.form.get("x"))
-        y = float(request.form.get("y"))
+        x = (float(request.form.get("latitude")) - REF_LAT) * 111320
+        y = (float(request.form.get("longitude")) - REF_LON) * 111320 * np.cos(REF_LAT*np.pi/180)
         sql_querry("sql/kurye/KoordinatGuncelle.sql", (x, y, kuryeID))
         return {"success": True}
     except Exception as e:

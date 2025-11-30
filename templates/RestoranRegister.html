@@ -44,7 +44,12 @@
 <script>
     document.getElementById('submitBtn').addEventListener('click', function () {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
+            navigator.geolocation.getCurrentPosition(showPosition, showError, {
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 0
+});
+
         } else {
             alert("Tarayıcınız konum servisini desteklemiyor.");
         }

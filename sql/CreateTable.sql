@@ -96,7 +96,7 @@ CREATE TABLE sepetUrunler(
 CREATE TABLE sparis(
     sparisNo    INT             NOT NULL AUTO_INCREMENT,
     efendiID    INT             NOT NULL,
-    durum       VARCHAR(10)     NOT NULL    DEFAULT "Get",
+    durum       VARCHAR(20)     NOT NULL    DEFAULT "Get",
     kuryeID     INT             DEFAULT NULL,
     teslimAdres VARCHAR(20)     NOT NULL,
 
@@ -104,7 +104,7 @@ CREATE TABLE sparis(
     CONSTRAINT sparisFKefendiID FOREIGN KEY(efendiID) REFERENCES efendi(ID),
     CONSTRAINT sparisFKkuryeID FOREIGN KEY(kuryeID) REFERENCES kurye(ID),
     CONSTRAINT sparisFKteslimAdres FOREIGN KEY(efendiID,teslimAdres) REFERENCES Adres(efendiID,adresName),
-    CONSTRAINT ENUMdurum CHECK (durum in ("Get","Cook","OnWay","Arrived")),
+    CONSTRAINT ENUMdurum CHECK (durum in ("Get","Cook","OnWay","Arrived","Cancelled","CancelledSeen")),
     CONSTRAINT CNSTkurye CHECK (kuryeID is NULL OR durum <> "Get")
 );
 

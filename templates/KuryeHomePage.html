@@ -165,8 +165,8 @@
                 const y = position.coords.latitude;
 
                 const formData = new FormData();
-                formData.append('x', x);
-                formData.append('y', y);
+                formData.append('longitude', x);
+                formData.append('latitude', y);
 
                 fetch('/kurye/koordinatGuncelle', {
                     method: 'POST',
