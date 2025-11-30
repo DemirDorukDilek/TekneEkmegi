@@ -1,3 +1,3 @@
 SELECT *
 FROM kurye
-WHERE email = %s OR telno = %s
+WHERE email = ? OR telno = ?

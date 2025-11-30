@@ -7,5 +7,5 @@ FROM
     Adres
     JOIN efendi on efendi.ID=Adres.efendiID
     CROSS JOIN restoran
-WHERE efendi.ID = %s AND restoran.name LIKE %s
+WHERE efendi.ID = ? AND restoran.name LIKE ?
 ORDER BY distSqr ASC

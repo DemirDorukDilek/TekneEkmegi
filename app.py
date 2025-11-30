@@ -4,7 +4,7 @@ import secrets
 import time
 import traceback
 from flask import Flask, render_template, request, redirect, flash, session,abort
-import mysql.connector as sql
+import pyodbc
 from werkzeug.security import generate_password_hash, check_password_hash
 from utils import *
 import os
@@ -77,7 +77,7 @@ def inject_navbar_adresler():
     try:
         if session.get("as") == TYPES.E and "user_id" in session:
             rows = sql_querry(
-                "SELECT adresName FROM Adres WHERE efendiID = %s ORDER BY adresName",
+                "SELECT adresName FROM Adres WHERE efendiID = ? ORDER BY adresName",
                 (session["user_id"],)
             ) or []
 
@@ -122,7 +122,7 @@ def HomePage_Get():
     if selected_name:
         rows = sql_querry(
             "SELECT adresName, il, ilce, mah, cd, binano, daireno "
-            "FROM Adres WHERE efendiID = %s AND adresName = %s",
+            "FROM Adres WHERE efendiID = ? AND adresName = ?",
             (user_id, selected_name)
         ) or []
         if rows:
@@ -156,7 +156,7 @@ def RestoranHomePage_get():
 def restoran_profil():
     restoran_id = session.get("user_id")
 
-    conn = sql.connect(**DB_CONFIG)
+    conn = get_db_connection()
     cur = conn.cursor()
 
     # PROFIL GÜNCELLEME
@@ -169,11 +169,11 @@ def restoran_profil():
         cur.execute(
             """
             UPDATE restoran
-            SET name=%s,
-                telno=%s,
-                adres=%s,
-                minsepettutari=%s
-            WHERE ID=%s
+            SET name=?,
+                telno=?,
+                adres=?,
+                minsepettutari=?
+            WHERE ID=?
             """,
             (name, telno, adress_form, Minsepet, restoran_id),
         )
@@ -185,7 +185,7 @@ def restoran_profil():
         """
         SELECT ID, name, telno, adres, minsepettutari
         FROM restoran
-        WHERE ID=%s
+        WHERE ID=?
         """,
         (restoran_id,),
     )
@@ -237,24 +237,24 @@ def profilim_get():
 
         try:
             sql_querry(
-                "UPDATE efendi SET name=%s, surname=%s, telno=%s, email=%s WHERE ID=%s",
+                "UPDATE efendi SET name=?, surname=?, telno=?, email=? WHERE ID=?",
                 (name, surname, telno, email, user_id)
             )
             flash("Profil bilgilerin güncellendi!", "success")
             return redirect("/profilim")
 
-        except sql.IntegrityError:
+        except pyodbc.IntegrityError:
             # telno veya email unique constraint patlarsa
             flash("Bu telefon numarası veya e-posta zaten başka bir hesapta kayıtlı.", "danger")
             return redirect("/profilim")
 
-        except sql.Error as err:
+        except pyodbc.Error as err:
             flash(f"Profil güncellenirken bir hata oluştu: {err}", "danger")
             return redirect("/profilim")
 
     # GET isteği: veriyi DB'den çekip formu doldur
     rows = sql_querry(
-        "SELECT name, surname, telno, email FROM efendi WHERE ID = %s",
+        "SELECT name, surname, telno, email FROM efendi WHERE ID = ?",
         (user_id,)
     ) or []
     user = rows[0] if rows else None  # (name, surname, telno, email)
@@ -310,7 +310,7 @@ def addAdress_get():
 def adreslerim_get():
     user_id = session["user_id"]
     adresler = sql_querry(
-        "SELECT adresName, il, ilce, mah, cd, binano, daireno FROM Adres WHERE efendiID = %s",
+        "SELECT adresName, il, ilce, mah, cd, binano, daireno FROM Adres WHERE efendiID = ?",
         (user_id,)
     ) or []
     selected_name = session.get("selected_adresName")
@@ -324,7 +324,7 @@ def adres_sec_post():
     adres_name = request.form["adresName"]
 
     rows = sql_querry(
-        "SELECT adresName FROM Adres WHERE efendiID = %s AND adresName = %s",
+        "SELECT adresName FROM Adres WHERE efendiID = ? AND adresName = ?",
         (user_id, adres_name)
     ) or []
 
@@ -345,11 +345,11 @@ def adres_sil_post():
 
     try:
         sql_querry(
-            "DELETE FROM Adres WHERE efendiID = %s AND adresName = %s",
+            "DELETE FROM Adres WHERE efendiID = ? AND adresName = ?",
             (user_id, adres_name)
         )
         flash("Adres silindi.", "success")
-    except sql.Error as err:
+    except pyodbc.Error as err:
         flash(f"Adres silinirken bir hata oluştu: {err}", "danger")
 
     return redirect("/adreslerim")
@@ -362,7 +362,7 @@ def adres_duzenle_get():
     adres_name = request.args.get("adresName")
 
     rows = sql_querry(
-        "SELECT adresName, il, ilce, mah, cd, binano, daireno FROM Adres WHERE efendiID = %s AND adresName = %s",
+        "SELECT adresName, il, ilce, mah, cd, binano, daireno FROM Adres WHERE efendiID = ? AND adresName = ?",
         (user_id, adres_name)
     ) or []
 
@@ -395,14 +395,14 @@ def adres_duzenle_post():
 
     try:
         sql_querry(
-            "UPDATE Adres SET adresName=%s, il=%s, ilce=%s, mah=%s, cd=%s, binano=%s, daireno=%s "
-            "WHERE efendiID=%s AND adresName=%s",
+            "UPDATE Adres SET adresName=?, il=?, ilce=?, mah=?, cd=?, binano=?, daireno=? "
+            "WHERE efendiID=? AND adresName=?",
             (new_name, il, ilce, mahalle, cadde, bina_no, daire_no, user_id, old_name)
         )
         flash("Adres güncellendi.", "success")
-    except sql.IntegrityError:
+    except pyodbc.IntegrityError:
         flash("Bu isimde zaten bir adresiniz var. Lütfen farklı bir isim kullanın.", "danger")
-    except sql.Error as err:
+    except pyodbc.Error as err:
         flash(f"Adres güncellenirken bir hata oluştu: {err}", "danger")
 
     return redirect("/adreslerim")
@@ -433,11 +433,11 @@ def efendiAddAdress_post():
             flash("Adres başarıyla eklendi!", "success")
             return redirect("/HomePage")
 
-        except sql.IntegrityError:
+        except pyodbc.IntegrityError:
             flash("Bu isimde bir adres zaten kayıtlı. Lütfen farklı bir adres adı girin.", "danger")
             return redirect("/addAdress")
 
-        except sql.Error as err:
+        except pyodbc.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
             return redirect("/addAdress")
 
@@ -464,7 +464,7 @@ def addYemek_post():
             sql_querry("sql/restoran/addYemek.sql", (name, price, session.get("user_id")))
             flash("Yemek başarıyla eklendi!", "success")
             return redirect("/RestoranHomePage")
-        except sql.Error as err:
+        except pyodbc.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
 
     return redirect("/addYemek")
@@ -480,7 +480,7 @@ def restoran_sec():
     restoranID = request.form.get("restoranID")
     
     restoran = sql_querry(
-        "SELECT ID, name, telno, adres, minsepettutari FROM restoran WHERE ID = %s",
+        "SELECT ID, name, telno, adres, minsepettutari FROM restoran WHERE ID = ?",
         (restoranID,)
     )
     
@@ -503,7 +503,7 @@ def restoran_sec_get():
         return redirect("/HomePage")
     
     restoran = sql_querry(
-        "SELECT ID, name, telno, adres, minsepettutari FROM restoran WHERE ID = %s",
+        "SELECT ID, name, telno, adres, minsepettutari FROM restoran WHERE ID = ?",
         (restoranID,)
     )
     
@@ -533,14 +533,14 @@ def sepete_ekle():
     try:
         if adet < 0:
             # Mevcut adeti kontrol et
-            mevcut = sql_querry("SELECT adet FROM sepetUrunler WHERE efendiID = %s AND yemekID = %s", (efendiID, yemekID))
+            mevcut = sql_querry("SELECT adet FROM sepetUrunler WHERE efendiID = ? AND yemekID = ?", (efendiID, yemekID))
             if mevcut[0][0] + adet <= 0:
-                sql_querry("DELETE FROM sepetUrunler WHERE efendiID = %s AND yemekID = %s", (efendiID, yemekID))
+                sql_querry("DELETE FROM sepetUrunler WHERE efendiID = ? AND yemekID = ?", (efendiID, yemekID))
                 flash("Ürün sepetten tamamen kaldırıldı!", "success")
                 if (restoranID == "sepet"):
                     return redirect("/sepetim")
                 return redirect(f"/restoranSec?restoranID={restoranID}")
-            sql_querry("UPDATE sepetUrunler SET adet=%s WHERE efendiID = %s AND yemekID = %s", (mevcut[0][0] - 1, efendiID, yemekID))
+            sql_querry("UPDATE sepetUrunler SET adet=? WHERE efendiID = ? AND yemekID = ?", (mevcut[0][0] - 1, efendiID, yemekID))
         else:
             result = sql_querry("sql/Siparis/sepeteEkle.sql", (efendiID, yemekID, adet, adet))
             print(f"DEBUG - SQL result: {result}")
@@ -602,7 +602,7 @@ def siparis_olustur():
             kart_sahibi = request.form.get('kartSahibi')
             son_kullanma = request.form.get('sonKullanma').replace("/","")
             cvv = request.form.get('cvv')
-            exist = sql_querry("SELECT kartno from krediKarti where kartno=%s",(kart_no,))
+            exist = sql_querry("SELECT kartno from krediKarti where kartno=?",(kart_no,))
 
         sepet_urunler = sql_querry("sql/Siparis/Sepetigetir.sql", (efendiID,))
         
@@ -621,7 +621,8 @@ def siparis_olustur():
         cursor = conn.cursor()
 
         cursor.execute(read_file("sql/SiparisVerme/siparisOlustur.sql"), (efendiID, selected_adres))
-        sparisNo = cursor.lastrowid
+        cursor.execute("SELECT LAST_INSERT_ID()")
+        sparisNo = cursor.fetchone()[0]
         
         for urun in sepet_urunler:
             yemekID = urun[0]
@@ -710,9 +711,9 @@ def register_post():
             flash("Kayıt başarıyla tamamlandı!", "success")
             return redirect("/login")
 
-        except sql.IntegrityError:
+        except pyodbc.IntegrityError:
             flash("Bu e-posta veya telefon numarası zaten kayıtlı.", "danger")
-        except sql.Error as err:
+        except pyodbc.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
 
         return redirect("/register")
@@ -734,7 +735,7 @@ def login_post():
                 login(user_data[0][0], "efendi")
                 return redirect("/HomePage")
 
-        except sql.Error as err:
+        except pyodbc.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
 
         return redirect("/login")
@@ -755,7 +756,7 @@ def RestoranLogin_post():
             else:
                 login(user_data[0][0], "restoran")
                 return redirect("/RestoranHomePage")
-        except sql.Error as err:
+        except pyodbc.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
 
         return redirect("/restoranLogin")
@@ -777,9 +778,9 @@ def RestoranRegister_post():
             flash("Kayıt başarıyla tamamlandı!", "success")
             return redirect("/restoranLogin")
 
-        except sql.IntegrityError:
+        except pyodbc.IntegrityError:
             flash("Bu e-posta veya telefon numarası zaten kayıtlı.", "danger")
-        except sql.Error as err:
+        except pyodbc.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
 
         return redirect("/restoranRegister")
@@ -799,9 +800,9 @@ def kuryeregister_post():
             flash("Kayıt başarıyla tamamlandı!", "success")
             return redirect("/kuryeLogin")
 
-        except sql.IntegrityError:
+        except pyodbc.IntegrityError:
             flash("Bu e-posta veya telefon numarası zaten kayıtlı.", "danger")
-        except sql.Error as err:
+        except pyodbc.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
 
         return redirect("/kuryeRegister")
@@ -823,7 +824,7 @@ def kuryelogin_post():
                 login(user_data[0][0], "kurye")
                 return redirect("/KuryeHomePage")
 
-        except sql.Error as err:
+        except pyodbc.Error as err:
             flash(f"Bir hata oluştu: {err}", "danger")
 
         return redirect("/kuryeLogin")
@@ -850,7 +851,7 @@ def KuryeHomePage_get():
 def kurye_profil():
     kurye_id = session.get("user_id")
 
-    conn = sql.connect(**DB_CONFIG)
+    conn = get_db_connection()
     cur = conn.cursor()
 
     # ========== PROFIL GÜNCELLEME ==========
@@ -861,7 +862,7 @@ def kurye_profil():
         email = request.form.get("email")   # ← ister eklersin ister çıkartırsın
 
         cur.execute(
-            "UPDATE kurye SET name=%s, surname=%s, telno=%s, email=%s WHERE ID=%s",
+            "UPDATE kurye SET name=?, surname=?, telno=?, email=? WHERE ID=?",
             (ad, soyad, telno, email, kurye_id),
         )
         conn.commit()
@@ -869,7 +870,7 @@ def kurye_profil():
 
     # ========== MEVCUT BILGILER ==========
     cur.execute(
-        "SELECT ID, name, surname, telno, email FROM kurye WHERE ID=%s",
+        "SELECT ID, name, surname, telno, email FROM kurye WHERE ID=?",
         (kurye_id,),
     )
     kurye = cur.fetchone()

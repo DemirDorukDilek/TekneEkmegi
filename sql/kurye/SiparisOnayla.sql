@@ -1,3 +1,3 @@
 UPDATE sparis
-SET kuryeID = %s, durum = 'Cook'
-WHERE sparisNo = %s AND kuryeID IS NULL
+SET kuryeID = ?, durum = 'Cook'
+WHERE sparisNo = ? AND kuryeID IS NULL

@@ -3,7 +3,7 @@ SELECT
     ((r.X - k.X)*(r.X - k.X) + (r.Y - k.Y)*(r.Y - k.Y)) AS uzaklikKaresi
 FROM kurye k
 CROSS JOIN restoran r
-WHERE r.ID = %s 
+WHERE r.ID = ? 
   AND k.isWorking = TRUE
   AND k.ID NOT IN (
       SELECT kuryeID FROM sparis 

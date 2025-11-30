@@ -1,3 +1,3 @@
 SELECT *
 FROM restoran
-WHERE telno = %s
+WHERE telno = ?

@@ -1,4 +1,4 @@
 SELECT ID, name, price 
 FROM yemek 
-WHERE restoranID = %s
+WHERE restoranID = ?
 ORDER BY name ASC

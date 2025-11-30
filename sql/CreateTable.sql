@@ -164,14 +164,12 @@ FOR EACH ROW
 BEGIN
     DECLARE existing_restaurant_id INT;
 
-    -- Müşterinin sepetinde mevcut bir restoranID var mı kontrol et
     SELECT DISTINCT y.restoranID INTO existing_restaurant_id
     FROM sepetUrunler su
     JOIN yemek y ON su.yemekID = y.ID
     WHERE su.efendiID = NEW.efendiID
     LIMIT 1;
 
-    -- Eğer varsa ve yeni eklenen yemeğin restoranı farklıysa hata ver
     IF existing_restaurant_id IS NOT NULL THEN
         IF existing_restaurant_id != (SELECT restoranID FROM yemek WHERE ID = NEW.yemekID) THEN
             SIGNAL SQLSTATE '45000'
@@ -186,7 +184,6 @@ FOR EACH ROW
 BEGIN
     DECLARE existing_restaurant_id INT;
 
-    -- Müşterinin sepetinde mevcut bir restoranID var mı kontrol et (güncellenen satır hariç)
     SELECT DISTINCT y.restoranID INTO existing_restaurant_id
     FROM sepetUrunler su
     JOIN yemek y ON su.yemekID = y.ID
@@ -194,7 +191,6 @@ BEGIN
       AND su.yemekID != OLD.yemekID
     LIMIT 1;
 
-    -- Eğer varsa ve yeni yemeğin restoranı farklıysa hata ver
     IF existing_restaurant_id IS NOT NULL THEN
         IF existing_restaurant_id != (SELECT restoranID FROM yemek WHERE ID = NEW.yemekID) THEN
             SIGNAL SQLSTATE '45000'

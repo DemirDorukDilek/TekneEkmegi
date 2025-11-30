@@ -20,5 +20,5 @@ JOIN Adres a ON s.efendiID = a.efendiID AND s.teslimAdres = a.adresName
 JOIN sparisUrunler su ON s.sparisNo = su.sparisNo
 JOIN yemek y ON su.yemekID = y.ID
 LEFT JOIN kurye k ON s.kuryeID = k.ID
-WHERE y.restoranID = %s AND s.durum != 'Arrived'
+WHERE y.restoranID = ? AND s.durum != 'Arrived'
 ORDER BY s.sparisNo DESC

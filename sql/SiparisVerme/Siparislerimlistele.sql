@@ -11,6 +11,6 @@ JOIN sparisUrunler su ON s.sparisNo = su.sparisNo
 JOIN yemek y ON su.yemekID = y.ID
 JOIN restoran r ON y.restoranID = r.ID
 LEFT JOIN kurye k ON s.kuryeID = k.ID
-WHERE s.efendiID = %s
+WHERE s.efendiID = ?
 GROUP BY s.sparisNo, s.durum, s.teslimAdres, r.name, k.name, k.surname
 ORDER BY s.sparisNo DESC

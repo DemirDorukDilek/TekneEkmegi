@@ -1,3 +1,3 @@
 SELECT *
 FROM efendi
-WHERE email = %s OR telno = %s
+WHERE email = ? OR telno = ?

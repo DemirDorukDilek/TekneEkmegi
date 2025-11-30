@@ -1,2 +1,2 @@
 DELETE FROM sepetUrunler 
-WHERE efendiID = %s
+WHERE efendiID = ?

@@ -7,5 +7,5 @@ FROM
     Adres
     JOIN efendi on efendi.ID=Adres.efendiID
     CROSS JOIN restoran
-WHERE efendi.ID = %s
+WHERE efendi.ID = ?
 ORDER BY distSqr ASC

@@ -1,3 +1,3 @@
 UPDATE kurye
-SET isWorking = %s
-WHERE ID = %s
+SET isWorking = ?
+WHERE ID = ?

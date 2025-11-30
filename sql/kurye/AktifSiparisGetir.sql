@@ -24,5 +24,5 @@ JOIN Adres a ON s.efendiID = a.efendiID AND s.teslimAdres = a.adresName
 JOIN sparisUrunler su ON s.sparisNo = su.sparisNo
 JOIN yemek y ON su.yemekID = y.ID
 JOIN restoran r ON y.restoranID = r.ID
-WHERE s.kuryeID = %s AND s.durum IN ('Cook', 'OnWay')
+WHERE s.kuryeID = ? AND s.durum IN ('Cook', 'OnWay')
 LIMIT 1

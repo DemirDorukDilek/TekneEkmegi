@@ -17,7 +17,7 @@ JOIN efendi e ON s.efendiID = e.ID
 JOIN sparisUrunler su ON s.sparisNo = su.sparisNo
 JOIN yemek y ON su.yemekID = y.ID
 JOIN restoran r ON y.restoranID = r.ID
-LEFT JOIN kurye k ON k.ID = %s
+LEFT JOIN kurye k ON k.ID = ?
 WHERE s.durum = 'Get' AND s.kuryeID IS NULL
 ORDER BY mesafe ASC
 LIMIT 10

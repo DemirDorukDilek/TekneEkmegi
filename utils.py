@@ -1,9 +1,9 @@
-from config import DB_CONFIG
-import mysql.connector as sql
+from config import get_connection_string
+import pyodbc
 import os
 
 def get_db_connection():
-    return sql.connect(**DB_CONFIG)
+    return pyodbc.connect(get_connection_string())
 
 def make_null(x):
     if x=="":return None
@@ -50,6 +50,8 @@ def make_table():
                 cursor.execute(code+";")
 
     conn.commit()
+    cursor.close()
+    conn.close()
 
 def make_index():
     conn = get_db_connection()
@@ -58,11 +60,15 @@ def make_index():
         if len(l.strip()) > 0 and l.startswith("CREATE INDEX"):
             cursor.execute(l.strip()+";")
     conn.commit()
+    cursor.close()
+    conn.close()
 
 def sql_querry(querry,args):
+    conn = None
+    cursor = None
     try:
         conn = get_db_connection()
-        cursor = conn.cursor(buffered=True)
+        cursor = conn.cursor()
         code = read_file(querry) if os.path.isfile(querry) else querry
         with open("sql_querry_log","a",encoding="utf-8") as f:
             f.write(code+"\n")
@@ -76,6 +82,7 @@ def sql_querry(querry,args):
         conn.commit()
         return data
     finally:
-        if "conn" in locals() and conn.is_connected():
+        if cursor is not None:
             cursor.close()
+        if conn is not None:
             conn.close()

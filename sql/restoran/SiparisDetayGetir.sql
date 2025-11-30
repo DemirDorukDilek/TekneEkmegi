@@ -5,4 +5,4 @@ SELECT
     (y.price * su.adet) AS toplamFiyat
 FROM sparisUrunler su
 JOIN yemek y ON su.yemekID = y.ID
-WHERE su.sparisNo = %s AND y.restoranID = %s
+WHERE su.sparisNo = ? AND y.restoranID = ?
