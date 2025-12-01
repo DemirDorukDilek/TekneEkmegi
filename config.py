@@ -1,7 +1,7 @@
 import os
 if os.name != "posix":
     from dotenv import load_dotenv;load_dotenv()
-
+print("******* .env dosyasi gerekmektedir ve db root sifresi ROOT_PASSWORD olarak girilmelidir bkz:config.py *******")
 # ODBC Connection String
 def get_connection_string():
     password = os.getenv("ROOT_PASSWORD")
