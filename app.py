@@ -16,7 +16,7 @@ app.secret_key = secrets.token_hex(32)
 session_version = 1 if os.getenv("debug", False) == "True" else time.time()
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SECURE=False,  # Development için False, HTTPS kullanıyorsan True yap
     SESSION_COOKIE_SAMESITE="Lax",
     PERMANENT_SESSION_LIFETIME=timedelta(days=30)
 )
@@ -315,11 +315,6 @@ def profilim_get():
     return render_template("Profilim.html", user=user)
 
 
-@app.route("/odemeYontemlerim")
-@login_required(TYPES.E)
-def odeme_yontemlerim_get():
-    return render_template("OdemeYontemlerim.html")
-
 
 @app.route("/gecmisSiparislerim")
 @login_required(TYPES.E)
@@ -328,17 +323,6 @@ def gecmis_siparislerim_get():
     siparisler = sql_querry("sql/SiparisVerme/siparislerimlistele.sql", (efendiID,)) or []
     return render_template("GecmisSiparislerim.html", siparisler=siparisler)
 
-
-@app.route("/kuponlarim")
-@login_required(TYPES.E)
-def kuponlarim_get():
-    return render_template("Kuponlarim.html")
-
-
-@app.route("/yardim")
-@login_required(TYPES.E)
-def yardim_get():
-    return render_template("Yardim.html")
 
 
 @app.route("/logout")
