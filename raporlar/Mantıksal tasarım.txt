@@ -1,0 +1,55 @@
+Strong Entitiyleri oluştur 
+EFENDİ (ID,Name,Surname,Telno,Password) // PK: ID
+spariş(sparişNo,durum) // PK: sparişno
+KURYE (ID,Name,Surname,Telno,Password,X,Y) // PK: ID
+YEMEK (ID,Name,Price) // PK: ID
+RESTORAN (ID, Name, telno, adres, password, X,Y minsepetTutari) // PK: ID
+
+Weak entityi oluştur ancak disjoint ve total olduğundan sub clasları oluştur
+NakitOdeme(sparişno, odemeDate, price) // PK: sparişno , FK: sparişno -> spariş.sparişno
+KredikartiOdeme(sparişno, odemeDate, price, kartno, kartsahibi, duedate, cvv)  // PK: sparişno , FK: sparişno -> spariş.sparişno
+Adres (efendiID,adresName,il,ilce,mah,cd,binano,daireno,X,Y)  // PK: {efendiID,adresName} , FK: efendiID -> efendi.ID
+
+1:1 ve 1:N relationlari FK ata
+
+YEMEK (ID, RestoranID ,Name,Price) // FK: RestoranID-> restoran.ID
+SPARİŞ (sparişNo, efendiID , AdresName , KuryeID ,durum) // FK: efendiID-> efendi.ID , AdresName->Adres.AdresName , KuryeID -> Kurye.ID
+
+M:N realationları oluştur
+SepetUrunler(EfendiID, YemekID, adet) // PK: {EfendiID, YemekID} , FK: efendiID-> efendi.ID , YemekID -> Yemek.ID
+sparişÜrünler(SarişID, YemekID, adet) // PK: {SarişID, YemekID} , FK: SarişID -> Sariş.ID , YemekID -> Yemek.ID
+
+
+Relational Shema Döüşümü Son Hali
+EFENDİ (ID,Name,Surname,Telno,Password) // PK: ID
+RESTORAN (ID, Name, telno, adres, password, X,Y minsepetTutari)  // PK: ID
+KURYE (ID,Name,Surname,Telno,Password,X,Y)  // PK: ID
+YEMEK (ID, RestoranID ,Name,Price)  // PK: ID , FK: RestoranID-> restoran.ID
+Adres (efendiID,adresName,il,ilce,mah,cd,binano,daireno,X,Y)  // PK: {efendiID,adresName} , FK: efendiID -> efendi.ID
+SepetUrunler(EfendiID, YemekID, adet)  // PK: {EfendiID, YemekID} , FK: efendiID-> efendi.ID , YemekID -> Yemek.ID
+SPARİŞ (sparişNo, efendiID , AdresName , KuryeID ,durum) // PK: sparişno , FK: efendiID-> efendi.ID , AdresName->Adres.AdresName , KuryeID -> Kurye.ID
+sparişÜrünler(SarişID, YemekID, adet) // PK: {SarişID, YemekID} , FK: SarişID -> Sariş.ID , YemekID -> Yemek.ID
+NakitOdeme(sparişno, odemeDate, price) // PK: sparişno , FK: sparişno -> spariş.sparişno
+KredikartiOdeme(sparişno, odemeDate, price, kartno, kartsahibi, duedate, cvv)  // PK: sparişno , FK: sparişno -> spariş.sparişno
+
+bu şekilde bu relational diagram 2NF e uygundur ancak
+KredikartiOdeme(sparişno, odemeDate, price, kartno, kartsahibi, duedate, cvv)
+burda sparişno -> kartno -> {kartsahibi, dueDate, cvv} olduğundan 3NF e uymaz
+
+3NF döüşümü uygulanır
+KredikartiOdeme(sparişno, odemeDate, price, kartno)
+KrediKartı(kartno, kartsahibi, duedate, cvv)
+
+Bu hali ile BCNF ye de uyumlu olduğunu düşünüyoruz
+Son Hal:
+EFENDİ (ID,Name,Surname,Telno,Password) // PK: ID
+RESTORAN (ID, Name, telno, adres, password, X,Y minsepetTutari)  // PK: ID
+KURYE (ID,Name,Surname,Telno,Password,X,Y)  // PK: ID
+YEMEK (ID, RestoranID ,Name,Price)  // PK: ID , FK: RestoranID-> restoran.ID
+Adres (efendiID,adresName,il,ilce,mah,cd,binano,daireno,X,Y)   PK: {efendiID,adresName} , FK: efendiID -> efendi.ID
+SepetUrunler(EfendiID, YemekID, adet)  // PK: {EfendiID, YemekID} , FK: efendiID-> efendi.ID , YemekID -> Yemek.ID
+SPARİŞ (sparişNo, efendiID , AdresName , KuryeID ,durum)  // PK: sparişno , FK: efendiID-> efendi.ID , AdresName->Adres.AdresName , KuryeID -> Kurye.ID
+sparişÜrünler(SarişID, YemekID, adet)  // PK: {SarişID, YemekID} , FK: SarişID -> Sariş.ID , YemekID -> Yemek.ID
+NakitOdeme(sparişno, odemeDate, price)  // PK: sparişno , FK: sparişno -> spariş.sparişno
+KredikartiOdeme(sparişno, odemeDate, price, kartno)  // PK: sparişno , FK: sparişno -> spariş.sparişno , kartno -> KrediKartı.kartno
+KrediKartı(kartno, kartsahibi, duedate, cvv)  // PK: kartno
