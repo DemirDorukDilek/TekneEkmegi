@@ -16,15 +16,6 @@ CREATE INDEX idx_sparis_durum ON sparis(durum);
 
 CREATE INDEX idx_sparis_kurye_durum ON sparis(kuryeID, durum);
 
-
-
--- odeme takibi icin indexler
-CREATE INDEX idx_nakitOdeme_EfendiOdedi ON nakitOdeme(EfendiOdedi);
-CREATE INDEX idx_nakitOdeme_ParaTeslimAlindi ON nakitOdeme(ParaTeslimAlindi);
-
-CREATE INDEX idx_krediKartiOdeme_EfendiOdedi ON krediKartiOdeme(EfendiOdedi);
-CREATE INDEX idx_krediKartiOdeme_ParaTeslimAlindi ON krediKartiOdeme(ParaTeslimAlindi);
-
 -- Kurye calisma durumu kontrolu icin
 CREATE INDEX idx_kurye_isWorking ON kurye(isWorking);
 

@@ -121,10 +121,6 @@ CREATE TABLE nakitOdeme(
     sparisNo                INT         NOT NULL,
     odemeDate               DATE        NOT NULL,
     price                   FLOAT       NOT NULL CHECK (price >= 0),
-    EfendiOdedi             BOOLEAN     DEFAULT false, -- Musteriden para alindi
-    ParaTeslimAlindi        BOOLEAN     DEFAULT false, -- Para Sisteme Ulasti (Nakit odendi ise kuryeden aliniyor)
-    KuryeUcretiOdendi       BOOLEAN     DEFAULT false, -- kuryeye parasi ondendi
-    RestoranUcretiOdendi    BOOLEAN     DEFAULT false, -- restorana parasi odendi
 
     CONSTRAINT PK PRIMARY KEY(sparisNo),
     CONSTRAINT nakitOdemeFKsparisNo FOREIGN KEY(sparisNo) REFERENCES sparis(sparisNo),
@@ -143,11 +139,6 @@ CREATE TABLE krediKartiOdeme(
     sparisNo                INT         NOT NULL,
     odemeDate               DATE        NOT NULL,
     price                   FLOAT       NOT NULL CHECK (price >= 0),
-    EfendiOdedi             BOOLEAN     DEFAULT false,
-    ParaTeslimAlindi        BOOLEAN     DEFAULT false,
-    KuryeUcretiOdendi       BOOLEAN     DEFAULT false,
-    RestoranUcretiOdendi    BOOLEAN     DEFAULT false,
-
     Kartno                  VARCHAR(16)           NOT NULL,
 
     CONSTRAINT PK PRIMARY KEY(sparisNo),

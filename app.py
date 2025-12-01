@@ -53,11 +53,11 @@ def otomatik_siparis_iptal(sparisNo, efendiID):
             print(f"Sipariş {sparisNo} 60 saniye içinde kabul edilmediği için iptal edildi.")
 
             sql_querry(
-                "UPDATE nakitOdeme SET ParaTeslimAlindi = 0 WHERE sparisNo = ?",
+                "UPDATE nakitOdeme SET price = 0 WHERE sparisNo = ?",
                 (sparisNo,)
             )
             sql_querry(
-                "UPDATE krediKartiOdeme SET ParaTeslimAlindi = 0 WHERE sparisNo = ?",
+                "UPDATE krediKartiOdeme SET price = 0 WHERE sparisNo = ?",
                 (sparisNo,)
             )
 
