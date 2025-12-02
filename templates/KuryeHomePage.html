@@ -64,13 +64,21 @@
                 {% endif %}
             </p>
         </div>
-
-        <form action="/kurye/siparisTamamla" method="post" class="courier-complete-form">
+        {% if siparis[1] == 'Cook' %}
+        <form action="/kurye/siparisOnayla" method="post" class="courier-complete-form">
             <input type="hidden" name="sparisNo" value="{{ siparis[0] }}">
             <button type="submit" class="btn btn-success">
-                ✅ Siparişi Teslim Et
+                Siparişi Teslim AL
             </button>
         </form>
+        {% else %}
+            <form action="/kurye/siparisTamamla" method="post" class="courier-complete-form">
+                <input type="hidden" name="sparisNo" value="{{ siparis[0] }}">
+                <button type="submit" class="btn btn-success">
+                    ✅ Siparişi Teslim Et
+                </button>
+            </form>
+        {% endif %}
     </section>
     {% else %}
     <!-- BEKLEYEN SİPARİŞLER KUTUSU -->

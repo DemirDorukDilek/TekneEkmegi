@@ -1045,7 +1045,7 @@ def kurye_siparis_onayla():
 
     try:
         sql_querry("sql/kurye/SiparisOnayla.sql", (kuryeID, sparisNo))
-        flash("Sipariş kabul edildi!", "success")
+        flash("Sipariş Teslim alındı!", "success")
         return redirect("/KuryeHomePage")
     except Exception as e:
         print(f"Sipariş onaylama hatası: {e}")

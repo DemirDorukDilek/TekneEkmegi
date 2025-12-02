@@ -1,3 +1,5 @@
 flask==3.1.2
 pyodbc==5.2.0
 python-dotenv==1.0.0
+werkzeug
+numpy
